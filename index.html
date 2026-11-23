@@ -1,0 +1,3918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SK025 Experiment 1: Rate of Reaction — Interactive Lab Companion</title>
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Chart.js for Live Kinetic Graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- docx.js for Client-Side Editable .DOCX Generation -->
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
+
+  <style>
+    /* Custom scrollbar & print rules */
+    .table-scroll::-webkit-scrollbar {
+      height: 6px;
+    }
+    .table-scroll::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    .table-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printReportArea,
+      #printReportArea * {
+        visibility: visible;
+      }
+      #printReportArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: #ffffff;
+        padding: 12mm;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased pb-24 sm:pb-10 selection:bg-teal-200 selection:text-teal-950">
+
+  <!-- ==================== TOP APP HEADER ==================== -->
+  <header class="bg-gradient-to-r from-teal-900 via-teal-800 to-slate-900 text-white shadow-md sticky top-0 z-30 no-print">
+    <div class="max-w-6xl mx-auto px-3 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-teal-500/20 border border-teal-400/40 flex items-center justify-center shrink-0">
+          <!-- Flask SVG Icon -->
+          <svg class="w-5 h-5 text-teal-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 3h6m-5 0v5.172a2 2 0 01-.586 1.414l-4.828 4.828A2 2 0 004 15.828V18a3 3 0 003 3h10a3 3 0 003-3v-2.172a2 2 0 00-.586-1.414l-4.828-4.828A2 2 0 0114 8.172V3" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-teal-400/20 text-teal-200 border border-teal-300/30">
+              SK025 • KPM Matriculation
+            </span>
+          </div>
+          <h1 class="text-sm sm:text-lg font-extrabold tracking-tight leading-tight mt-0.5">
+            Experiment 1: Rate of Reaction
+          </h1>
+        </div>
+      </div>
+
+      <!-- Quick Utility Buttons -->
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          onclick="loadSampleData()"
+          class="min-h-[40px] px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 active:bg-white/25 border border-white/20 text-xs font-semibold text-teal-100 transition flex items-center gap-1.5"
+          title="Load realistic sample lab data for demonstration"
+        >
+          <span>Sample Data</span>
+        </button>
+        <button
+          type="button"
+          onclick="openResetModal()"
+          class="min-h-[40px] px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 active:bg-rose-500/40 border border-rose-300/30 text-xs font-semibold text-rose-100 transition"
+          title="Clear all saved progress"
+        >
+          Reset
+        </button>
+      </div>
+    </div>
+
+    <!-- Desktop / Tablet Top Navigation Bar -->
+    <nav class="hidden sm:block bg-slate-900/60 border-t border-white/10">
+      <div class="max-w-6xl mx-auto px-6 flex items-center gap-2 py-1.5">
+        <button type="button" data-tab="tab1" onclick="switchTab('tab1')" class="nav-tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+          <span>1. Pre-Lab &amp; Apparatus</span>
+        </button>
+        <button type="button" data-tab="tab2" onclick="switchTab('tab2')" class="nav-tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+          <span>2. Procedure</span>
+        </button>
+        <button type="button" data-tab="tab3" onclick="switchTab('tab3')" class="nav-tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+          <span>3. Data &amp; Graphs</span>
+        </button>
+        <button type="button" data-tab="tab4" onclick="switchTab('tab4')" class="nav-tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+          <span>4. Report &amp; .DOCX</span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ==================== MOBILE FIXED BOTTOM NAVIGATION BAR ==================== -->
+  <nav class="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-slate-900 text-slate-300 border-t border-slate-700 shadow-2xl no-print">
+    <div class="grid grid-cols-4 gap-1 p-1.5">
+      <button type="button" data-tab="tab1" onclick="switchTab('tab1')" class="mobile-tab-btn min-h-[52px] rounded-xl flex flex-col items-center justify-center gap-0.5 text-[11px] font-semibold transition">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+        </svg>
+        <span>Pre-Lab</span>
+      </button>
+      <button type="button" data-tab="tab2" onclick="switchTab('tab2')" class="mobile-tab-btn min-h-[52px] rounded-xl flex flex-col items-center justify-center gap-0.5 text-[11px] font-semibold transition">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+        </svg>
+        <span>Procedure</span>
+      </button>
+      <button type="button" data-tab="tab3" onclick="switchTab('tab3')" class="mobile-tab-btn min-h-[52px] rounded-xl flex flex-col items-center justify-center gap-0.5 text-[11px] font-semibold transition">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+        </svg>
+        <span>Data/Graph</span>
+      </button>
+      <button type="button" data-tab="tab4" onclick="switchTab('tab4')" class="mobile-tab-btn min-h-[52px] rounded-xl flex flex-col items-center justify-center gap-0.5 text-[11px] font-semibold transition">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <span>Report</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ==================== MAIN WORKSPACE CONTAINER ==================== -->
+  <main class="max-w-6xl mx-auto px-3 sm:px-6 pt-4 space-y-4 no-print">
+
+    <!-- COLLAPSIBLE STUDENT DETAILS BAR -->
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-3.5 sm:p-4">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-700">
+            Student &amp; Practical Session Details
+          </h2>
+          <span id="autoSaveIndicator" class="text-[11px] text-slate-400 font-medium hidden sm:inline">• Auto-saved locally</span>
+        </div>
+        <button
+          type="button"
+          onclick="toggleStudentBar()"
+          id="toggleStudentBarBtn"
+          class="min-h-[36px] px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-700 transition"
+        >
+          Hide
+        </button>
+      </div>
+
+      <div id="studentDetailsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-3">
+        <div>
+          <label for="studentName" class="block text-xs font-semibold text-slate-600 mb-1">Full Name</label>
+          <input
+            id="studentName"
+            type="text"
+            placeholder="e.g., Nur Aisyah binti Ahmad"
+            oninput="updateStudentField('name', this.value)"
+            class="w-full min-h-[44px] px-3 py-2 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600"
+          />
+        </div>
+        <div>
+          <label for="studentMatric" class="block text-xs font-semibold text-slate-600 mb-1">Matriculation No.</label>
+          <input
+            id="studentMatric"
+            type="text"
+            placeholder="e.g., MS2415102849"
+            oninput="updateStudentField('matric', this.value)"
+            class="w-full min-h-[44px] px-3 py-2 rounded-xl border border-slate-300 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-teal-600"
+          />
+        </div>
+        <div>
+          <label for="studentGroup" class="block text-xs font-semibold text-slate-600 mb-1">Practicum Class / Group</label>
+          <input
+            id="studentGroup"
+            type="text"
+            placeholder="e.g., K1T04A"
+            oninput="updateStudentField('group', this.value)"
+            class="w-full min-h-[44px] px-3 py-2 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600"
+          />
+        </div>
+        <div>
+          <label for="studentDate" class="block text-xs font-semibold text-slate-600 mb-1">Practical Date</label>
+          <input
+            id="studentDate"
+            type="date"
+            oninput="updateStudentField('date', this.value)"
+            class="w-full min-h-[44px] px-3 py-2 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- PERSISTENT FLOATING / DOCKED DIGITAL LAB STOPWATCH -->
+    <section class="bg-slate-900 text-white rounded-2xl shadow-lg border border-slate-700/80 p-3.5 sm:p-4">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span id="swStatusDot" class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+          <span class="text-xs sm:text-sm font-bold uppercase tracking-wider text-teal-300">
+            Digital Lab Stopwatch
+          </span>
+          <span class="text-[11px] text-slate-400 hidden md:inline">(Time endpoints &amp; send directly to your data tables)</span>
+        </div>
+        <button
+          type="button"
+          onclick="toggleStopwatchExpand()"
+          id="swExpandBtn"
+          class="min-h-[36px] px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition"
+        >
+          Minimize
+        </button>
+      </div>
+
+      <div id="swBody" class="mt-3 grid grid-cols-1 lg:grid-cols-12 gap-3 items-center">
+        <!-- Digital Timer Display + Controls -->
+        <div class="lg:col-span-6 flex flex-wrap items-center justify-between sm:justify-start gap-3 bg-slate-950/70 rounded-xl px-4 py-2.5 border border-slate-800">
+          <div class="font-mono text-3xl sm:text-4xl font-bold tracking-tight text-amber-300 tabular-nums" id="swDisplay">
+            00:00.00
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              id="swStartBtn"
+              onclick="startStopwatch()"
+              class="min-h-[44px] px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-bold text-sm shadow transition"
+            >
+              Start
+            </button>
+            <button
+              type="button"
+              id="swStopBtn"
+              onclick="stopStopwatch()"
+              class="min-h-[44px] px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-white font-bold text-sm shadow transition"
+            >
+              Stop
+            </button>
+            <button
+              type="button"
+              onclick="resetStopwatch()"
+              class="min-h-[44px] px-3.5 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 active:bg-slate-800 text-slate-200 font-semibold text-sm transition"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick-Assign Dropdown + Send Button -->
+        <div class="lg:col-span-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          <label for="swTargetSelect" class="sr-only">Target Table Row</label>
+          <select
+            id="swTargetSelect"
+            onchange="setStopwatchTarget(this.value)"
+            class="flex-1 min-h-[44px] px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+          >
+            <optgroup label="Table 1.1: Concentration (Na₂S₂O₃ + HCl)">
+              <option value="t1_0">Table 1.1 — Run 1 (50.00 mL Na₂S₂O₃)</option>
+              <option value="t1_1">Table 1.1 — Run 2 (40.00 mL Na₂S₂O₃)</option>
+              <option value="t1_2">Table 1.1 — Run 3 (30.00 mL Na₂S₂O₃)</option>
+              <option value="t1_3">Table 1.1 — Run 4 (20.00 mL Na₂S₂O₃)</option>
+              <option value="t1_4">Table 1.1 — Run 5 (10.00 mL Na₂S₂O₃)</option>
+            </optgroup>
+            <optgroup label="Table 1.2: Without Catalyst (A1 + B1)">
+              <option value="t2_no_0">Table 1.2 — 30°C Without Catalyst (A1+B1)</option>
+              <option value="t2_no_1">Table 1.2 — 35°C Without Catalyst (A1+B1)</option>
+              <option value="t2_no_2">Table 1.2 — 40°C Without Catalyst (A1+B1)</option>
+              <option value="t2_no_3">Table 1.2 — 50°C Without Catalyst (A1+B1)</option>
+            </optgroup>
+            <optgroup label="Table 1.2: With Catalyst MnSO₄ (A2 + B2)">
+              <option value="t2_cat_0">Table 1.2 — 30°C With Catalyst (A2+B2)</option>
+              <option value="t2_cat_1">Table 1.2 — 35°C With Catalyst (A2+B2)</option>
+              <option value="t2_cat_2">Table 1.2 — 40°C With Catalyst (A2+B2)</option>
+              <option value="t2_cat_3">Table 1.2 — 50°C With Catalyst (A2+B2)</option>
+            </optgroup>
+          </select>
+
+          <button
+            type="button"
+            onclick="assignStopwatchToTable()"
+            class="min-h-[44px] px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 active:bg-teal-700 text-white font-bold text-xs sm:text-sm shadow transition shrink-0"
+          >
+            Send Time to Table →
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         TAB 1: PRE-LAB, OBJECTIVES, EQUATIONS & APPARATUS CHECKLIST
+         ================================================================ -->
+    <section id="tab1" class="tab-panel space-y-4">
+      <!-- Objective & Theory Overview Card -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-4">
+        <div class="border-l-4 border-teal-600 pl-3.5">
+          <span class="text-xs font-bold uppercase tracking-wider text-teal-700">Learning Objective</span>
+          <h2 class="text-base sm:text-lg font-bold text-slate-900 mt-0.5">
+            To study the effect of concentration, temperature, and catalyst on the reaction rate.
+          </h2>
+        </div>
+
+        <p class="text-sm text-slate-600 leading-relaxed">
+          The <strong>reaction rate</strong> is the change in concentration of reactants or products per unit time. Because both experiments measure the fixed time <span class="font-mono font-semibold text-slate-800">t</span> required for a distinct visual endpoint to occur, the relative reaction rate is inversely proportional to time (<span class="font-mono font-semibold text-teal-800">Rate ∝ 1/t</span>).
+        </p>
+
+        <!-- Balanced Chemical Equations Box -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+          <div class="rounded-xl bg-teal-50/70 border border-teal-200 p-3.5">
+            <span class="text-xs font-bold uppercase tracking-wider text-teal-800">Part (A) Clock Reaction Equation</span>
+            <p class="font-mono text-xs sm:text-sm font-semibold text-slate-900 mt-1.5 leading-relaxed">
+              Na₂S₂O₃(aq) + 2HCl(aq) → 2NaCl(aq) + H₂O(l) + SO₂(g) + <span class="bg-amber-200/80 px-1 rounded">S(s)</span>
+            </p>
+            <p class="text-xs text-slate-600 mt-1">
+              Insoluble yellow colloidal sulfur <strong>S(s)</strong> precipitates and gradually obscures the 'X' mark beneath the conical flask.
+            </p>
+          </div>
+
+          <div class="rounded-xl bg-indigo-50/70 border border-indigo-200 p-3.5">
+            <span class="text-xs font-bold uppercase tracking-wider text-indigo-800">Part (B) Redox Reaction Equation</span>
+            <p class="font-mono text-xs sm:text-sm font-semibold text-slate-900 mt-1.5 leading-relaxed">
+              <span class="bg-purple-200/80 px-1 rounded">2MnO₄⁻(aq)</span> + 5C₂O₄²⁻(aq) + 16H⁺(aq) → <span class="bg-slate-200 px-1 rounded">2Mn²⁺(aq)</span> + 10CO₂(g) + 8H₂O(l)
+            </p>
+            <p class="text-xs text-slate-600 mt-1">
+              Deep purple <strong>MnO₄⁻</strong> is reduced to colourless <strong>Mn²⁺</strong>; <span class="font-mono">MnSO₄</span> supplies <span class="font-mono">Mn²⁺</span> ions as a catalyst.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Checklists: Apparatus & Chemical Reagents -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- Apparatus Checklist -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <h3 class="text-base font-bold text-slate-900">Apparatus Checklist</h3>
+              <p class="text-xs text-slate-500">Tap each item once collected at your bench</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="apparatusCountBadge" class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-teal-100 text-teal-900">
+                0 / 10
+              </span>
+              <button
+                type="button"
+                onclick="checkAllChecklist('apparatus')"
+                class="min-h-[36px] px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-700"
+              >
+                Check All
+              </button>
+            </div>
+          </div>
+          <div id="apparatusList" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+        </div>
+
+        <!-- Chemical Reagents Checklist -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <h3 class="text-base font-bold text-slate-900">Chemical Reagents Checklist</h3>
+              <p class="text-xs text-slate-500">Verify reagent concentrations before starting</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="reagentCountBadge" class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-900">
+                0 / 6
+              </span>
+              <button
+                type="button"
+                onclick="checkAllChecklist('reagents')"
+                class="min-h-[36px] px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-700"
+              >
+                Check All
+              </button>
+            </div>
+          </div>
+          <div id="reagentList" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+        </div>
+      </div>
+
+      <!-- Lab Safety & Technique Reminders -->
+      <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 sm:p-5 space-y-2">
+        <h3 class="text-sm font-bold uppercase tracking-wider text-amber-900 flex items-center gap-2">
+          <span>⚠️ Essential Bench Safety &amp; Precision Reminders</span>
+        </h3>
+        <ul class="text-xs sm:text-sm text-amber-950 space-y-1.5 list-disc pl-5">
+          <li><strong>Corrosive Acids:</strong> Handle <span class="font-mono font-semibold">2.0 M H₂SO₄</span> and <span class="font-mono font-semibold">0.1 M HCl</span> carefully. Rinse immediately with plenty of water if spilled on skin.</li>
+          <li><strong>SO₂ Fumes (Part A):</strong> Dispose of reacted sulfur mixtures in the designated sink/waste container with running water in a well-ventilated area.</li>
+          <li><strong>Consistent Viewing Angle:</strong> In Part (A), always view the 'X' mark vertically from the <strong>top of the conical flask</strong> using the same 'X' paper for all 5 runs.</li>
+          <li><strong>Thermal Equilibrium (Part B):</strong> Keep boiling tube <span class="font-mono font-semibold">A1/A2</span> submerged inside the water bath when pouring <span class="font-mono font-semibold">B1/B2</span> into it so the reaction temperature stays constant.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         TAB 2: INTERACTIVE STEP-BY-STEP PROCEDURE
+         ================================================================ -->
+    <section id="tab2" class="tab-panel hidden space-y-4">
+      <!-- Part A / Part B Sub-Selector -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div class="grid grid-cols-2 gap-2 flex-1">
+          <button
+            type="button"
+            id="procPartABtn"
+            onclick="switchProcedurePart('A')"
+            class="min-h-[46px] px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition"
+          >
+            Part (A): Effect of Concentration
+          </button>
+          <button
+            type="button"
+            id="procPartBBtn"
+            onclick="switchProcedurePart('B')"
+            class="min-h-[46px] px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition"
+          >
+            Part (B): Temperature &amp; Catalyst
+          </button>
+        </div>
+        <div class="text-xs font-semibold text-slate-500 px-2 text-center sm:text-right" id="procProgressLabel">
+          Completed: 0 / 3 steps
+        </div>
+      </div>
+
+      <!-- PART (A) PROCEDURE PANEL -->
+      <div id="procPanelA" class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div class="lg:col-span-7 space-y-3" id="stepsContainerA"></div>
+
+        <!-- Visual Bench Diagram Card for Part A -->
+        <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-3 h-fit">
+          <span class="text-xs font-bold uppercase tracking-wider text-teal-700">Visual Setup Guide — Part (A)</span>
+          <h3 class="text-base font-bold text-slate-900">Disappearing 'X' Mark Setup</h3>
+          <div class="bg-slate-50 rounded-xl border border-slate-200 p-3 flex justify-center">
+            <svg viewBox="0 0 320 230" class="w-full max-w-[300px] h-auto" aria-label="Part A Conical Flask over X mark diagram">
+              <!-- Eye Icon Top View -->
+              <ellipse cx="160" cy="24" rx="22" ry="11" fill="#e0f2fe" stroke="#0284c7" stroke-width="2" />
+              <circle cx="160" cy="24" r="5" fill="#0369a1" />
+              <text x="190" y="28" font-size="11" font-weight="700" fill="#0369a1">View from top</text>
+              <line x1="160" y1="38" x2="160" y2="66" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="4 3" />
+
+              <!-- White Paper with X Mark -->
+              <polygon points="65,195 255,195 275,215 45,215" fill="#ffffff" stroke="#64748b" stroke-width="2" />
+              <line x1="150" y1="200" x2="170" y2="210" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />
+              <line x1="170" y1="200" x2="150" y2="210" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />
+              <text x="160" y="227" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">Laminated white paper with 'X' mark</text>
+
+              <!-- Conical Flask -->
+              <polygon points="145,72 175,72 215,193 105,193" fill="#fef9c3" fill-opacity="0.75" stroke="#334155" stroke-width="2.5" />
+              <!-- Liquid Level -->
+              <polygon points="126,132 194,132 213,191 107,191" fill="#fde047" fill-opacity="0.55" />
+              <!-- Glass Rod -->
+              <line x1="185" y1="55" x2="138" y2="185" stroke="#0ea5e9" stroke-width="3.5" stroke-linecap="round" />
+              <text x="200" y="62" font-size="11" font-weight="600" fill="#0369a1">Glass rod (stir)</text>
+              <text x="160" y="166" text-anchor="middle" font-size="11" font-weight="700" fill="#854d0e">Na₂S₂O₃ + HCl</text>
+            </svg>
+          </div>
+          <div class="rounded-xl bg-teal-50 border border-teal-200 p-3 text-xs text-teal-950 space-y-1">
+            <p class="font-bold">Endpoint Trigger:</p>
+            <p>Stop the stopwatch the exact instant the black <strong>'X'</strong> mark is completely obscured by the yellow sulfur suspension when viewed vertically from above.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PART (B) PROCEDURE PANEL -->
+      <div id="procPanelB" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div class="lg:col-span-7 space-y-3" id="stepsContainerB"></div>
+
+        <!-- Visual Bench Diagram Card for Part B -->
+        <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-3 h-fit">
+          <span class="text-xs font-bold uppercase tracking-wider text-indigo-700">Visual Setup Guide — Part (B)</span>
+          <h3 class="text-base font-bold text-slate-900">Boiling Tube Labeling &amp; Water Bath</h3>
+          <div class="bg-slate-50 rounded-xl border border-slate-200 p-3 flex justify-center">
+            <svg viewBox="0 0 340 235" class="w-full max-w-[320px] h-auto" aria-label="Part B Boiling Tubes A1 A2 B1 B2 setup">
+              <!-- Tube A1 -->
+              <rect x="28" y="30" width="44" height="115" rx="18" fill="#f8fafc" stroke="#334155" stroke-width="2" />
+              <rect x="30" y="85" width="40" height="58" rx="14" fill="#e2e8f0" />
+              <text x="50" y="22" text-anchor="middle" font-size="12" font-weight="800" fill="#0f172a">A1</text>
+              <text x="50" y="162" text-anchor="middle" font-size="10" font-weight="600" fill="#334155">10 mL</text>
+              <text x="50" y="174" text-anchor="middle" font-size="10" font-weight="600" fill="#334155">H₂C₂O₄</text>
+
+              <!-- Tube A2 -->
+              <rect x="98" y="30" width="44" height="115" rx="18" fill="#f8fafc" stroke="#334155" stroke-width="2" />
+              <rect x="100" y="85" width="40" height="58" rx="14" fill="#e2e8f0" />
+              <text x="120" y="22" text-anchor="middle" font-size="12" font-weight="800" fill="#0f172a">A2</text>
+              <text x="120" y="162" text-anchor="middle" font-size="10" font-weight="600" fill="#334155">10 mL</text>
+              <text x="120" y="174" text-anchor="middle" font-size="10" font-weight="600" fill="#334155">H₂C₂O₄</text>
+
+              <!-- Tube B1 -->
+              <rect x="182" y="30" width="44" height="115" rx="18" fill="#f8fafc" stroke="#334155" stroke-width="2" />
+              <rect x="184" y="72" width="40" height="71" rx="14" fill="#a855f7" fill-opacity="0.7" />
+              <text x="204" y="22" text-anchor="middle" font-size="12" font-weight="800" fill="#6b21a8">B1</text>
+              <text x="204" y="162" text-anchor="middle" font-size="10" font-weight="600" fill="#6b21a8">5 mL KMnO₄</text>
+              <text x="204" y="174" text-anchor="middle" font-size="10" font-weight="600" fill="#6b21a8">+ 10 mL H₂SO₄</text>
+
+              <!-- Tube B2 -->
+              <rect x="256" y="30" width="44" height="115" rx="18" fill="#f8fafc" stroke="#0f766e" stroke-width="2.5" />
+              <rect x="258" y="72" width="40" height="71" rx="14" fill="#9333ea" fill-opacity="0.75" />
+              <text x="278" y="22" text-anchor="middle" font-size="12" font-weight="800" fill="#0f766e">B2 (+Cat)</text>
+              <text x="278" y="162" text-anchor="middle" font-size="10" font-weight="600" fill="#0f766e">5 mL KMnO₄</text>
+              <text x="278" y="174" text-anchor="middle" font-size="10" font-weight="600" fill="#0f766e">+ 10 mL H₂SO₄</text>
+              <text x="278" y="187" text-anchor="middle" font-size="10" font-weight="800" fill="#047857">+ 5 drops MnSO₄</text>
+
+              <!-- Pairing Legend -->
+              <rect x="24" y="198" width="292" height="28" rx="8" fill="#e0e7ff" />
+              <text x="170" y="216" text-anchor="middle" font-size="11" font-weight="700" fill="#312e81">
+                Mix Pairs at 30°C, 35°C, 40°C, 50°C: (A1+B1) vs (A2+B2)
+              </text>
+            </svg>
+          </div>
+          <div class="rounded-xl bg-indigo-50 border border-indigo-200 p-3 text-xs text-indigo-950 space-y-1">
+            <p class="font-bold">Endpoint Trigger:</p>
+            <p>Equilibrate tubes in the water bath for <strong>~3 minutes</strong>. Keep tube <strong>A1/A2</strong> in the water bath while pouring <strong>B1/B2</strong> in, start timer immediately, and stop when the purple mixture turns completely <strong>colourless</strong>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         TAB 3: OBSERVATION GUIDE, DATA TABLES & LIVE CHARTS
+         ================================================================ -->
+    <section id="tab3" class="tab-panel hidden space-y-5">
+
+      <!-- Visual Observation Guide & Qualitative Notes -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-teal-700">Observation Recording Guide</span>
+          <h2 class="text-base sm:text-lg font-bold text-slate-900">Qualitative Visual Changes to Observe &amp; Record</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Part A Visual Cue -->
+          <div class="rounded-xl border border-slate-200 p-3.5 space-y-2.5 bg-slate-50/60">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-teal-800">Part (A): Na₂S₂O₃ + HCl</span>
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-900">Precipitate Formation</span>
+            </div>
+            <!-- Colourless to Cloudy Yellow Gradient Bar -->
+            <div class="grid grid-cols-3 gap-1.5 text-center text-[11px] font-semibold">
+              <div class="rounded-lg bg-white border border-slate-300 py-2 px-1">
+                <div class="font-extrabold text-slate-900 text-sm">X</div>
+                <div class="text-slate-500 mt-0.5">Clear ('X' sharp)</div>
+              </div>
+              <div class="rounded-lg bg-yellow-100 border border-yellow-300 py-2 px-1">
+                <div class="font-extrabold text-yellow-700/50 text-sm">X</div>
+                <div class="text-yellow-900 mt-0.5">Turning cloudy</div>
+              </div>
+              <div class="rounded-lg bg-yellow-300 border border-yellow-500 py-2 px-1">
+                <div class="font-extrabold text-yellow-300 text-sm select-none">X</div>
+                <div class="text-yellow-950 mt-0.5">Opaque ('X' gone)</div>
+              </div>
+            </div>
+            <div>
+              <label for="obsPartA" class="block text-xs font-semibold text-slate-700 mb-1">
+                Your Qualitative Observation Note — Part (A):
+              </label>
+              <textarea
+                id="obsPartA"
+                rows="2"
+                placeholder="Describe the colour/turbidity change when HCl is added to Na₂S₂O₃..."
+                oninput="updateObservation('partA', this.value)"
+                class="w-full rounded-xl border border-slate-300 p-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-teal-600"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- Part B Visual Cue -->
+          <div class="rounded-xl border border-slate-200 p-3.5 space-y-2.5 bg-slate-50/60">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-indigo-800">Part (B): KMnO₄ + H₂C₂O₄</span>
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-purple-100 text-purple-900">Decolourization</span>
+            </div>
+            <!-- Purple to Colourless Gradient Bar -->
+            <div class="grid grid-cols-3 gap-1.5 text-center text-[11px] font-semibold">
+              <div class="rounded-lg bg-purple-700 text-white py-2 px-1">
+                <div class="font-bold">Purple</div>
+                <div class="text-purple-200 mt-0.5">Initial MnO₄⁻</div>
+              </div>
+              <div class="rounded-lg bg-amber-200/80 border border-amber-300 text-amber-950 py-2 px-1">
+                <div class="font-bold">Pale Pink/Brown</div>
+                <div class="text-amber-800 mt-0.5">Intermediate Mn³⁺</div>
+              </div>
+              <div class="rounded-lg bg-white border border-slate-300 text-slate-800 py-2 px-1">
+                <div class="font-bold">Colourless</div>
+                <div class="text-slate-500 mt-0.5">Endpoint (Mn²⁺)</div>
+              </div>
+            </div>
+            <div>
+              <label for="obsPartB" class="block text-xs font-semibold text-slate-700 mb-1">
+                Your Qualitative Observation Note — Part (B):
+              </label>
+              <textarea
+                id="obsPartB"
+                rows="2"
+                placeholder="Describe the colour transition and comparison between (A1+B1) and (A2+B2)..."
+                oninput="updateObservation('partB', this.value)"
+                class="w-full rounded-xl border border-slate-300 p-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLE 1.1 & GRAPH 1: EFFECT OF CONCENTRATION -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-teal-700">Part (A) Results</span>
+            <h2 class="text-base sm:text-lg font-bold text-slate-900">Table 1.1: Effect of Concentration on Reaction Rate</h2>
+          </div>
+
+          <!-- Dilution Volume Mode Toggle -->
+          <div class="flex flex-wrap items-center gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
+            <span class="text-[11px] font-bold text-slate-600 px-1.5">Dilution Basis (M₁V₁ = M₂V₂):</span>
+            <button
+              type="button"
+              id="concMode50Btn"
+              onclick="setConcMode('50')"
+              class="min-h-[36px] px-2.5 py-1 rounded-lg text-xs font-bold transition"
+            >
+              V₂ = 50.00 mL (Before HCl)
+            </button>
+            <button
+              type="button"
+              id="concMode60Btn"
+              onclick="setConcMode('60')"
+              class="min-h-[36px] px-2.5 py-1 rounded-lg text-xs font-bold transition"
+            >
+              V₂ = 60.00 mL (Total Mix)
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto table-scroll rounded-xl border border-slate-200">
+          <table class="w-full text-xs sm:text-sm text-left border-collapse min-w-[640px]">
+            <thead>
+              <tr class="bg-slate-800 text-white text-[11px] uppercase tracking-wider">
+                <th class="py-3 px-3 text-center">Run</th>
+                <th class="py-3 px-3 text-right">Vol. of 0.2 M Na₂S₂O₃ (mL)</th>
+                <th class="py-3 px-3 text-right">Vol. of Distilled Water (mL)</th>
+                <th class="py-3 px-3 text-right bg-teal-900">Conc. of Na₂S₂O₃ (M)</th>
+                <th class="py-3 px-3 text-right">Vol. of 0.1 M HCl (mL)</th>
+                <th class="py-3 px-3 text-center bg-indigo-900">Time, t (s)</th>
+                <th class="py-3 px-3 text-right">Rate, 1/t (s⁻¹)</th>
+              </tr>
+            </thead>
+            <tbody id="table1Body" class="divide-y divide-slate-200 tabular-nums"></tbody>
+          </table>
+        </div>
+
+        <!-- Live Graph 1 -->
+        <div class="pt-2">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm font-bold text-slate-800">
+              Graph 1: Rate of Reaction (1/t) vs. Concentration of Na₂S₂O₃ (M)
+            </h3>
+            <span class="text-xs text-slate-500">Updates automatically as you enter time</span>
+          </div>
+          <div class="bg-slate-50 rounded-xl border border-slate-200 p-3 sm:p-4">
+            <div class="relative w-full h-[260px] sm:h-[310px]">
+              <canvas id="chart1Canvas"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLE 1.2 & GRAPH 2: EFFECT OF TEMPERATURE & CATALYST -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-indigo-700">Part (B) Results</span>
+          <h2 class="text-base sm:text-lg font-bold text-slate-900">Table 1.2: Effect of Temperature and Catalyst on Reaction Rate</h2>
+        </div>
+
+        <div class="overflow-x-auto table-scroll rounded-xl border border-slate-200">
+          <table class="w-full text-xs sm:text-sm text-left border-collapse min-w-[600px]">
+            <thead>
+              <tr class="bg-slate-800 text-white text-[11px] uppercase tracking-wider">
+                <th rowspan="2" class="py-2.5 px-3 text-center border-r border-slate-700">Temperature (°C)</th>
+                <th colspan="2" class="py-2.5 px-3 text-center border-r border-slate-700 bg-indigo-900">
+                  (A1 + B1) Without Catalyst MnSO₄
+                </th>
+                <th colspan="2" class="py-2.5 px-3 text-center bg-teal-900">
+                  (A2 + B2) With Catalyst MnSO₄
+                </th>
+              </tr>
+              <tr class="bg-slate-700 text-white text-[11px] uppercase tracking-wider">
+                <th class="py-2 px-3 text-center border-r border-slate-600">Time, t (s)</th>
+                <th class="py-2 px-3 text-right border-r border-slate-600">1/t (s⁻¹)</th>
+                <th class="py-2 px-3 text-center border-r border-slate-600">Time, t (s)</th>
+                <th class="py-2 px-3 text-right">1/t (s⁻¹)</th>
+              </tr>
+            </thead>
+            <tbody id="table2Body" class="divide-y divide-slate-200 tabular-nums"></tbody>
+          </table>
+        </div>
+
+        <!-- Live Graph 2 -->
+        <div class="pt-2">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm font-bold text-slate-800">
+              Graph 2: Rate of Reaction (1/t) vs. Temperature (°C) — Uncatalysed vs. Catalysed
+            </h3>
+            <span class="text-xs text-slate-500">Dual curve comparison on same axes</span>
+          </div>
+          <div class="bg-slate-50 rounded-xl border border-slate-200 p-3 sm:p-4">
+            <div class="relative w-full h-[270px] sm:h-[320px]">
+              <canvas id="chart2Canvas"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         TAB 4: GUIDED LAB REPORT BUILDER (7-SECTION WRITING TRAINER & .DOCX)
+         ================================================================ -->
+    <section id="tab4" class="tab-panel hidden space-y-5">
+      <!-- Top Action Banner -->
+      <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-teal-900 text-white rounded-2xl shadow-md p-5 sm:p-6">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div class="space-y-1.5">
+            <span class="inline-block text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-teal-400/20 text-teal-200 border border-teal-400/30">
+              7-Section Scientific Report Writing Trainer
+            </span>
+            <h2 class="text-xl sm:text-2xl font-bold">SK025 Guided Lab Report Builder &amp; .DOCX Export</h2>
+            <p class="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+              Follow the standard Matriculation Chemistry report sequence (<span class="text-teal-200 font-semibold">1. Title → 2. Objectives → 3. Theory → 4. Procedure → 5. Data Analysis → 6. Discussion &amp; Exercise → 7. Conclusion</span>). Practice summarizing theory and rewriting procedures into passive past tense, then preview or download an editable Microsoft Word (<span class="font-mono text-teal-300">.docx</span>) report.
+            </p>
+          </div>
+
+          <div class="flex flex-col sm:flex-row lg:flex-col gap-2.5 shrink-0">
+            <button
+              type="button"
+              onclick="openReportPreviewModal()"
+              class="min-h-[46px] px-5 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 active:bg-white/30 border border-white/25 text-white font-bold text-sm transition flex items-center justify-center gap-2"
+            >
+              <svg class="w-4 h-4 shrink-0 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              <span>Preview Full Report</span>
+            </button>
+            <button
+              type="button"
+              id="generateDocxBtn"
+              onclick="generateDocxReport()"
+              class="min-h-[48px] px-5 py-3 rounded-xl bg-teal-500 hover:bg-teal-400 active:bg-teal-600 text-slate-950 font-extrabold text-sm shadow-lg shadow-teal-950/40 transition flex items-center justify-center gap-2"
+            >
+              <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span>Download Editable .DOCX</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sticky Section-Jump Pill Bar & Completion Tracker -->
+      <div class="sticky top-[62px] sm:top-[116px] z-20 bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200 shadow-sm p-3 space-y-2.5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-600">Report Flow Navigator</span>
+          <span id="sevenSectionProgressBadge" class="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-teal-100 text-teal-900">
+            0 / 7 Sections Ready
+          </span>
+        </div>
+        <div id="sectionJumpBar" class="flex items-center gap-1.5 overflow-x-auto table-scroll pb-1"></div>
+      </div>
+
+      <!-- ==============================================================
+           SECTION 1: TITLE & METADATA
+           ============================================================== -->
+      <article id="repSec1" class="scroll-mt-40 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2.5">
+            <span class="w-8 h-8 rounded-xl bg-teal-700 text-white font-extrabold text-sm flex items-center justify-center">1</span>
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-teal-700">Section 1</span>
+              <h3 class="text-base sm:text-lg font-bold text-slate-900">Title &amp; Student Identification</h3>
+            </div>
+          </div>
+          <span id="sec1StatusBadge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">Check Details</span>
+        </div>
+
+        <div class="rounded-xl bg-gradient-to-r from-teal-50 to-slate-50 border border-teal-200 p-4 text-center">
+          <p class="text-[11px] font-bold uppercase tracking-widest text-teal-800">Chemistry Lab Manual — SK025</p>
+          <h4 class="text-lg sm:text-xl font-extrabold text-slate-900 mt-0.5">EXPERIMENT 1: RATE OF REACTION</h4>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div>
+            <label for="repTitleName" class="block text-xs font-bold text-slate-700 mb-1">Student Full Name</label>
+            <input
+              id="repTitleName"
+              type="text"
+              placeholder="e.g., Nur Aisyah binti Ahmad"
+              oninput="syncTitleMetadata('name', this.value)"
+              class="w-full min-h-[44px] px-3 py-2 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600"
+            />
+          </div>
+          <div>
+            <label for="repTitleMatric" class="block text-xs font-bold text-slate-700 mb-1">Matriculation No.</label>
+            <input
+              id="repTitleMatric"
+              type="text"
+              placeholder="e.g., MS2415102849"
+              oninput="syncTitleMetadata('matric', this.value)"
+              class="w-full min-h-[44px] px-3 py-2 rounded-xl border border-slate-300 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-teal-600"
+            />
+          </div>
+          <div>
+            <label for="repTitleGroup" class="block text-xs font-bold text-slate-700 mb-1">Practicum Class / Group</label>
+            <input
+              id="repTitleGroup"
+              type="text"
+              placeholder="e.g., K1T04A"
+              oninput="syncTitleMetadata('group', this.value)"
+              class="w-full min-h-[44px] px-3 py-2 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600"
+            />
+          </div>
+          <div>
+            <label for="repTitleDate" class="block text-xs font-bold text-slate-700 mb-1">Practical Date</label>
+            <input
+              id="repTitleDate"
+              type="date"
+              oninput="syncTitleMetadata('date', this.value)"
+              class="w-full min-h-[44px] px-3 py-2 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600"
+            />
+          </div>
+          <div class="sm:col-span-2">
+            <label for="repTitleLecturer" class="block text-xs font-bold text-slate-700 mb-1">Lecturer Name</label>
+            <input
+              id="repTitleLecturer"
+              type="text"
+              placeholder="e.g., Pn. Siti Aminah binti Ismail"
+              oninput="syncTitleMetadata('lecturer', this.value)"
+              class="w-full min-h-[44px] px-3 py-2 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600"
+            />
+          </div>
+        </div>
+      </article>
+
+      <!-- ==============================================================
+           SECTION 2: OBJECTIVES
+           ============================================================== -->
+      <article id="repSec2" class="scroll-mt-40 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2.5">
+            <span class="w-8 h-8 rounded-xl bg-teal-700 text-white font-extrabold text-sm flex items-center justify-center">2</span>
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-teal-700">Section 2</span>
+              <h3 class="text-base sm:text-lg font-bold text-slate-900">Objectives</h3>
+            </div>
+          </div>
+          <button
+            type="button"
+            onclick="resetDefaultObjectives()"
+            class="min-h-[36px] px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition"
+          >
+            Restore SK025 Objective
+          </button>
+        </div>
+        <p class="text-xs text-slate-600">
+          State the purpose of the experiment clearly in infinitive form (<em>"To study..."</em>). Pre-populated from the SK025 manual; you may refine it if instructed by your lecturer.
+        </p>
+        <textarea
+          id="repObjectives"
+          rows="2"
+          oninput="updateReportField('objectives', this.value)"
+          class="w-full rounded-xl border border-slate-300 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600"
+        ></textarea>
+      </article>
+
+      <!-- ==============================================================
+           SECTION 3: THEORY (INTRODUCTION SUMMARIZER)
+           ============================================================== -->
+      <article id="repSec3" class="scroll-mt-40 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2.5">
+            <span class="w-8 h-8 rounded-xl bg-indigo-700 text-white font-extrabold text-sm flex items-center justify-center">3</span>
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-700">Section 3 • Introduction Summarizer</span>
+              <h3 class="text-base sm:text-lg font-bold text-slate-900">Theory</h3>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="theoryWordCountBadge" class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-800 border border-indigo-200">
+              0 words
+            </span>
+            <button
+              type="button"
+              onclick="toggleHint('hintTheorySample')"
+              class="min-h-[38px] px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold transition"
+            >
+              View Sample Summary Structure
+            </button>
+          </div>
+        </div>
+
+        <!-- Sample Summary Structure Hint -->
+        <div id="hintTheorySample" class="hidden rounded-xl bg-amber-50 border border-amber-200 p-3.5 text-xs sm:text-sm text-amber-950 space-y-1.5">
+          <p class="font-bold">How to Structure a Concise Scientific Theory Summary (3–5 sentences):</p>
+          <ol class="list-decimal pl-4 space-y-1">
+            <li><strong>Define reaction rate:</strong> State that reaction rate is the change in concentration of reactants or products per unit time.</li>
+            <li><strong>State influencing factors:</strong> Mention temperature, concentration of reactants, catalyst, particle size, and pressure.</li>
+            <li><strong>Explain measurement &amp; mathematical relation:</strong> Explain that rate is measured by observing physical/chemical changes (such as precipitate formation or colour change) and is inversely proportional to reaction time (<span class="font-mono">Rate ∝ 1/t</span>).</li>
+            <li><strong>Include reaction equations:</strong> Briefly state the reactions studied in Part A (<span class="font-mono">Na₂S₂O₃ + HCl</span>) and Part B (<span class="font-mono">MnO₄⁻ + C₂O₄²⁻</span>).</li>
+          </ol>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <!-- Left: Original SK025 Introduction Reference Box -->
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Reference: Original SK025 Lab Manual Introduction</span>
+              <span class="text-[11px] font-mono text-slate-500">Page 36</span>
+            </div>
+            <blockquote class="bg-white border-l-4 border-teal-600 rounded-r-xl p-3.5 text-xs sm:text-sm text-slate-700 leading-relaxed italic shadow-sm">
+              "The reaction rate is the change in concentration of the reactants or products per unit time. The factors that influence the rate of reaction are temperature, pressure, catalyst, size of particles and concentration of reactants. The rate of a reaction can be studied by observing the change in the chemical or physical properties of species involved in the reaction. The reaction rate is inversely proportional to the time of the reaction, i.e., the faster the reaction occurs, the shorter is the time for the reaction to complete."
+            </blockquote>
+
+            <!-- Interactive Key-Concept Checklist -->
+            <div class="space-y-1.5 pt-1">
+              <p class="text-xs font-bold text-slate-700">Interactive Key-Concept Checklist (Auto-detects or tap to check):</p>
+              <div id="theoryConceptChecklist" class="space-y-1.5"></div>
+            </div>
+          </div>
+
+          <!-- Right: Student Theory Summary Editor -->
+          <div class="rounded-xl border border-indigo-200 bg-indigo-50/30 p-4 flex flex-col justify-between space-y-2.5">
+            <div>
+              <label for="repTheorySummary" class="block text-xs font-bold text-indigo-950 mb-1">
+                Your Summarized Theory (Paraphrase in clear, concise scientific paragraphs):
+              </label>
+              <p class="text-[11px] text-slate-600 mb-2">
+                Avoid copying word-for-word. Combine the core definition, factors, inverse time relationship (<span class="font-mono">1/t</span>), and chemical equations into your own summary.
+              </p>
+              <textarea
+                id="repTheorySummary"
+                rows="9"
+                placeholder="Summarize the introduction above in your own clear, concise scientific paragraphs..."
+                oninput="updateTheorySummary(this.value)"
+                class="w-full rounded-xl border border-slate-300 p-3 text-sm bg-white leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-600"
+              ></textarea>
+            </div>
+            <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+              <span>Target length: ~50–120 words</span>
+              <span id="theoryConceptScore" class="font-bold text-indigo-700">0 / 5 key concepts included</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ==============================================================
+           SECTION 4: PROCEDURE (PASSIVE PAST TENSE SKILL TRAINER & REWRITER)
+           ============================================================== -->
+      <article id="repSec4" class="scroll-mt-40 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2.5">
+            <span class="w-8 h-8 rounded-xl bg-teal-700 text-white font-extrabold text-sm flex items-center justify-center">4</span>
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-teal-700">Section 4 • Passive Past Tense Skill Trainer</span>
+              <h3 class="text-base sm:text-lg font-bold text-slate-900">Procedure (Passive Past Tense Rewriter)</h3>
+            </div>
+          </div>
+          <span id="procPassiveProgressBadge" class="text-xs font-mono font-bold px-3 py-1 rounded-full bg-teal-50 text-teal-900 border border-teal-200">
+            0 / 12 Steps Verified Passive
+          </span>
+        </div>
+
+        <!-- 4.1 Grammar Rule & Transformation Guide Card -->
+        <div class="rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-50/90 via-white to-teal-50/50 p-4 sm:p-5 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h4 class="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded-md bg-amber-200 text-amber-950 text-xs font-bold">Grammar Rule</span>
+              Converting Lab Manual Instructions into Passive Past Tense
+            </h4>
+            <span class="font-mono text-xs font-bold bg-slate-900 text-teal-300 px-3 py-1 rounded-lg">
+              [Object / Apparatus] + [was / were] + [Past Participle (V3)]
+            </span>
+          </div>
+
+          <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+            In a scientific lab report, the procedure describes what <strong>was already done</strong> objectively. Never start sentences with imperative command verbs (<em>Place, Pipette, Stir, Pour, Record</em>) and never use personal pronouns (<em>I, we, my, our, you</em>).
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            <div class="rounded-xl bg-rose-50/80 border border-rose-200 p-3 space-y-1">
+              <span class="font-bold text-rose-800 uppercase tracking-wider block">✗ Lab Manual (Imperative Command)</span>
+              <p class="text-slate-700 font-medium">
+                "<strong>Place</strong> 50 mL of 0.2 M Na₂S₂O₃ using a burette into a 100 mL conical flask."
+              </p>
+              <p class="text-slate-700 font-medium">
+                "<strong>Add</strong> 5 drops of 10% MnSO₄ solution to B2. <strong>Stir</strong> the mixture."
+              </p>
+            </div>
+            <div class="rounded-xl bg-emerald-50/80 border border-emerald-200 p-3 space-y-1">
+              <span class="font-bold text-emerald-800 uppercase tracking-wider block">✓ Lab Report (Passive Past Tense)</span>
+              <p class="text-slate-800 font-medium">
+                "50.00 mL of 0.2 M Na₂S₂O₃ <strong>was placed</strong> into a 100 mL conical flask using a burette."
+              </p>
+              <p class="text-slate-800 font-medium">
+                "5 drops of 10% MnSO₄ solution <strong>were added</strong> to boiling tube B2 and the mixture <strong>was stirred</strong>."
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4.2 Interactive 3-Question Passive Voice Practice Mini-Check -->
+        <div class="rounded-2xl border border-indigo-200 bg-indigo-50/35 p-4 sm:p-5 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-700">Warm-Up Skill Drill</span>
+              <h4 class="text-sm sm:text-base font-bold text-slate-900">Interactive 3-Question Passive Voice Practice Mini-Check</h4>
+            </div>
+            <span id="passiveQuizScoreBadge" class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-white text-indigo-800 border border-indigo-200">
+              0 / 3 Checked
+            </span>
+          </div>
+          <div id="passiveQuizContainer" class="grid grid-cols-1 lg:grid-cols-3 gap-3"></div>
+        </div>
+
+        <!-- 4.3 View Mode Switcher & Model Toggle Bar -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-100 p-3 rounded-xl border border-slate-200">
+          <div class="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-200">
+            <button
+              type="button"
+              id="procViewStepsBtn"
+              onclick="setProcedureRewriteView('steps')"
+              class="min-h-[38px] px-3 py-1.5 rounded-lg text-xs font-bold transition"
+            >
+              Step-by-Step Rewriter
+            </button>
+            <button
+              type="button"
+              id="procViewParaBtn"
+              onclick="setProcedureRewriteView('paragraph')"
+              class="min-h-[38px] px-3 py-1.5 rounded-lg text-xs font-bold transition"
+            >
+              Unified Full Paragraph View
+            </button>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onclick="toggleAllModelProcedures()"
+              id="toggleAllModelsBtn"
+              class="min-h-[38px] px-3 py-1.5 rounded-xl bg-white hover:bg-teal-50 text-teal-800 border border-teal-300 text-xs font-bold transition"
+            >
+              Show All Model Answers
+            </button>
+          </div>
+        </div>
+
+        <!-- Step-by-Step Rewriter Container -->
+        <div id="procStepRewriterView" class="space-y-5">
+          <!-- Part A Steps -->
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="text-sm font-extrabold uppercase tracking-wider text-teal-800">
+                Part (A): Effect of Concentration on the Reaction Rate (3 Steps)
+              </h4>
+            </div>
+            <div id="procRewriteListA" class="space-y-3"></div>
+          </div>
+
+          <!-- Part B Steps -->
+          <div class="space-y-3 pt-2">
+            <div class="flex items-center justify-between">
+              <h4 class="text-sm font-extrabold uppercase tracking-wider text-indigo-800">
+                Part (B): Effect of Temperature and Catalyst on the Reaction Rate (9 Steps)
+              </h4>
+            </div>
+            <div id="procRewriteListB" class="space-y-3"></div>
+          </div>
+        </div>
+
+        <!-- Unified Full Paragraph View (Live-Synced) -->
+        <div id="procUnifiedParagraphView" class="hidden space-y-4">
+          <div class="rounded-xl bg-teal-50/70 border border-teal-200 p-3 text-xs text-teal-950">
+            <strong>Live Paragraph Preview:</strong> This view combines your rewritten steps into continuous academic paragraphs—the exact format that will appear in Section 4.0 of your downloaded <span class="font-mono">.docx</span> report.
+          </div>
+
+          <div class="rounded-xl border border-slate-200 p-4 space-y-2 bg-slate-50/50">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-teal-800">Part (A) Unified Passive Past Tense Paragraph</h4>
+              <span id="paraBadgeA" class="text-xs font-semibold"></span>
+            </div>
+            <p id="unifiedParaTextA" class="text-sm text-slate-800 leading-relaxed bg-white p-3.5 rounded-xl border border-slate-200"></p>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 p-4 space-y-2 bg-slate-50/50">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-800">Part (B) Unified Passive Past Tense Paragraph</h4>
+              <span id="paraBadgeB" class="text-xs font-semibold"></span>
+            </div>
+            <p id="unifiedParaTextB" class="text-sm text-slate-800 leading-relaxed bg-white p-3.5 rounded-xl border border-slate-200"></p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ==============================================================
+           SECTION 5: DATA ANALYSIS
+           ============================================================== -->
+      <article id="repSec5" class="scroll-mt-40 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2.5">
+            <span class="w-8 h-8 rounded-xl bg-indigo-700 text-white font-extrabold text-sm flex items-center justify-center">5</span>
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-700">Section 5 • Tables, Sample Calculations &amp; Graph Interpretation</span>
+              <h3 class="text-base sm:text-lg font-bold text-slate-900">Data Analysis</h3>
+            </div>
+          </div>
+          <button
+            type="button"
+            onclick="switchTab('tab3')"
+            class="min-h-[36px] px-3 py-1 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs font-bold transition"
+          >
+            Edit Raw Times in Tab 3 →
+          </button>
+        </div>
+
+        <!-- 5.1 Live Synced Table 1.1 + Interactive Sample Calculation Box -->
+        <div class="space-y-3">
+          <h4 class="text-sm font-extrabold text-teal-800 uppercase tracking-wider">
+            5.1 Part (A): Concentration Effect — Table 1.1, Sample Calculation &amp; Graph 1
+          </h4>
+
+          <div class="overflow-x-auto table-scroll rounded-xl border border-slate-200">
+            <table class="w-full text-xs sm:text-sm text-left border-collapse min-w-[600px]">
+              <thead>
+                <tr class="bg-slate-800 text-white text-[11px] uppercase tracking-wider">
+                  <th class="py-2.5 px-3 text-center">Run</th>
+                  <th class="py-2.5 px-3 text-right">Vol. 0.2 M Na₂S₂O₃ (mL)</th>
+                  <th class="py-2.5 px-3 text-right">Vol. H₂O (mL)</th>
+                  <th class="py-2.5 px-3 text-right bg-teal-900">Conc. Na₂S₂O₃ (M)</th>
+                  <th class="py-2.5 px-3 text-right">Vol. 0.1 M HCl (mL)</th>
+                  <th class="py-2.5 px-3 text-right bg-indigo-900">Time, t (s)</th>
+                  <th class="py-2.5 px-3 text-right">Rate, 1/t (s⁻¹)</th>
+                </tr>
+              </thead>
+              <tbody id="repSyncedTable1Body" class="divide-y divide-slate-200 tabular-nums"></tbody>
+            </table>
+          </div>
+
+          <!-- Interactive Sample Calculation Box (Run 2) -->
+          <div id="sampleCalculationBox" class="rounded-xl border border-teal-200 bg-teal-50/50 p-4 space-y-2 text-xs sm:text-sm"></div>
+
+          <!-- Graph 1 Preview + Interpretation -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start pt-1">
+            <div class="lg:col-span-6 bg-slate-50 rounded-xl border border-slate-200 p-3">
+              <p class="text-xs font-bold text-slate-700 mb-2">Graph 1 Preview: Rate (1/t) vs. [Na₂S₂O₃]</p>
+              <div class="relative w-full h-[220px]">
+                <canvas id="chart1ReportCanvas"></canvas>
+              </div>
+            </div>
+            <div class="lg:col-span-6 space-y-2">
+              <div class="flex items-center justify-between gap-2">
+                <label for="repPartARelationship" class="text-xs font-bold text-slate-800">
+                  Graph 1 Interpretation (SK025 Step 7): Relationship between [Na₂S₂O₃], time t, and rate of reaction
+                </label>
+                <button
+                  type="button"
+                  onclick="toggleHint('hintPartA')"
+                  class="shrink-0 px-2.5 py-1 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 text-xs font-bold"
+                >
+                  Guiding Hint
+                </button>
+              </div>
+              <div id="hintPartA" class="hidden rounded-xl bg-amber-50 border border-amber-200 p-2.5 text-xs text-amber-950">
+                Address both <strong>time (t)</strong> and <strong>rate (1/t)</strong>: As concentration of <span class="font-mono">Na₂S₂O₃</span> increases, reaction time <span class="font-mono">t</span> decreases while rate (<span class="font-mono">1/t</span>) increases linearly (directly proportional).
+              </div>
+              <textarea
+                id="repPartARelationship"
+                rows="6"
+                placeholder="State the relationship between the concentration of Na2S2O3 with reaction time t and the rate of reaction (1/t)..."
+                oninput="updateReportField('partARelationship', this.value)"
+                class="w-full rounded-xl border border-slate-300 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5.2 Live Synced Table 1.2 + Graph 2 Preview + Interpretations -->
+        <div class="space-y-3 pt-4 border-t border-slate-200">
+          <h4 class="text-sm font-extrabold text-indigo-800 uppercase tracking-wider">
+            5.2 Part (B): Temperature &amp; Catalyst — Table 1.2 &amp; Graph 2
+          </h4>
+
+          <div class="overflow-x-auto table-scroll rounded-xl border border-slate-200">
+            <table class="w-full text-xs sm:text-sm text-left border-collapse min-w-[560px]">
+              <thead>
+                <tr class="bg-slate-800 text-white text-[11px] uppercase tracking-wider">
+                  <th rowspan="2" class="py-2 px-3 text-center border-r border-slate-700">Temp (°C)</th>
+                  <th colspan="2" class="py-2 px-3 text-center border-r border-slate-700 bg-indigo-900">(A1 + B1) Without Catalyst MnSO₄</th>
+                  <th colspan="2" class="py-2 px-3 text-center bg-teal-900">(A2 + B2) With Catalyst MnSO₄</th>
+                </tr>
+                <tr class="bg-slate-700 text-white text-[11px]">
+                  <th class="py-1.5 px-3 text-right border-r border-slate-600">Time, t (s)</th>
+                  <th class="py-1.5 px-3 text-right border-r border-slate-600">Rate, 1/t (s⁻¹)</th>
+                  <th class="py-1.5 px-3 text-right border-r border-slate-600">Time, t (s)</th>
+                  <th class="py-1.5 px-3 text-right">Rate, 1/t (s⁻¹)</th>
+                </tr>
+              </thead>
+              <tbody id="repSyncedTable2Body" class="divide-y divide-slate-200 tabular-nums"></tbody>
+            </table>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start pt-1">
+            <div class="lg:col-span-6 bg-slate-50 rounded-xl border border-slate-200 p-3">
+              <p class="text-xs font-bold text-slate-700 mb-2">Graph 2 Preview: Rate (1/t) vs. Temperature (°C)</p>
+              <div class="relative w-full h-[230px]">
+                <canvas id="chart2ReportCanvas"></canvas>
+              </div>
+            </div>
+
+            <div class="lg:col-span-6 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-800">Graph 2 Deductions (SK025 Step 11)</span>
+                <button
+                  type="button"
+                  onclick="toggleHint('hintPartB')"
+                  class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs font-bold"
+                >
+                  Guiding Hint
+                </button>
+              </div>
+              <div id="hintPartB" class="hidden rounded-xl bg-amber-50 border border-amber-200 p-2.5 text-xs text-amber-950 space-y-1">
+                <p><strong>(i) Temperature:</strong> As temperature rises from 30°C to 50°C, rate (<span class="font-mono">1/t</span>) increases rapidly.</p>
+                <p><strong>(ii) Catalyst:</strong> At any given temperature, the reaction with <span class="font-mono">MnSO₄</span> catalyst <span class="font-mono">(A2+B2)</span> has a higher <span class="font-mono">1/t</span> value (faster rate) than without catalyst <span class="font-mono">(A1+B1)</span>.</p>
+              </div>
+
+              <div>
+                <label for="repPartBTemp" class="block text-xs font-bold text-slate-700 mb-1">
+                  (i) Relationship between temperature and rate of reaction:
+                </label>
+                <textarea
+                  id="repPartBTemp"
+                  rows="2"
+                  placeholder="Deduce the relationship between temperature and rate of reaction from Graph 2..."
+                  oninput="updateReportField('partBTemp', this.value)"
+                  class="w-full rounded-xl border border-slate-300 p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                ></textarea>
+              </div>
+
+              <div>
+                <label for="repPartBCatalyst" class="block text-xs font-bold text-slate-700 mb-1">
+                  (ii) Relationship between catalyst and rate of reaction:
+                </label>
+                <textarea
+                  id="repPartBCatalyst"
+                  rows="2"
+                  placeholder="Deduce the effect of adding MnSO4 catalyst on the rate of reaction..."
+                  oninput="updateReportField('partBCatalyst', this.value)"
+                  class="w-full rounded-xl border border-slate-300 p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ==============================================================
+           SECTION 6: DISCUSSION AND EXERCISE
+           ============================================================== -->
+      <article id="repSec6" class="scroll-mt-40 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2.5">
+            <span class="w-8 h-8 rounded-xl bg-emerald-700 text-white font-extrabold text-sm flex items-center justify-center">6</span>
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-700">Section 6 • Collision Theory, Precautions &amp; Point to Discuss</span>
+              <h3 class="text-base sm:text-lg font-bold text-slate-900">Discussion and Exercise</h3>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6A. Scientific Discussion & Experimental Precautions -->
+        <div class="space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h4 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
+              6A. Scientific Discussion &amp; Experimental Precautions
+            </h4>
+            <button
+              type="button"
+              onclick="toggleHint('hintDiscussion6A')"
+              class="min-h-[36px] px-3 py-1 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold transition"
+            >
+              Guiding Hint (Collision Theory &amp; Precautions)
+            </button>
+          </div>
+
+          <div id="hintDiscussion6A" class="hidden rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-950 space-y-1">
+            <p><strong>Collision Theory &amp; Observations:</strong></p>
+            <ul class="list-disc pl-4 space-y-0.5">
+              <li><strong>Concentration (Part A):</strong> Higher <span class="font-mono">[Na₂S₂O₃]</span> increases the number of <span class="font-mono">S₂O₃²⁻</span> ions per unit volume → higher frequency of effective collisions → faster formation of yellow colloidal <span class="font-mono">S(s)</span> precipitate.</li>
+              <li><strong>Temperature (Part B):</strong> Higher temperature increases average kinetic energy of molecules → more particles have <span class="font-mono">KE ≥ Eₐ</span> → faster decolourization of purple <span class="font-mono">MnO₄⁻</span> to colourless <span class="font-mono">Mn²⁺</span>.</li>
+              <li><strong>Precautions:</strong> Use the same conical flask &amp; 'X' mark paper viewed vertically from above; allow boiling tubes to equilibrate in the water bath for 3 minutes and keep tube A submerged during mixing.</li>
+            </ul>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label for="repDiscussionTheoryObs" class="block text-xs font-bold text-slate-700 mb-1">
+                Explanation of Trends (Collision Theory &amp; Qualitative Observations):
+              </label>
+              <textarea
+                id="repDiscussionTheoryObs"
+                rows="4"
+                placeholder="Explain your experimental trends and visual observations using Collision Theory (effective collision frequency, kinetic energy, activation energy)..."
+                oninput="updateReportField('discussionTheoryObs', this.value)"
+                class="w-full rounded-xl border border-slate-300 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
+              ></textarea>
+            </div>
+            <div>
+              <label for="repPrecautions" class="block text-xs font-bold text-slate-700 mb-1">
+                Experimental Precautions &amp; Possible Sources of Error:
+              </label>
+              <textarea
+                id="repPrecautions"
+                rows="4"
+                placeholder="State key precautions taken to minimize timing, parallax, and temperature-loss errors..."
+                oninput="updateReportField('precautions', this.value)"
+                class="w-full rounded-xl border border-slate-300 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6B. Exercise (Point to Discuss from SK025 Manual) -->
+        <div class="space-y-3 pt-4 border-t border-slate-200">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h4 class="text-sm font-extrabold text-emerald-800 uppercase tracking-wider">
+              6B. Exercise (Point to Discuss — SK025 Manual Page 39)
+            </h4>
+            <button
+              type="button"
+              onclick="toggleHint('hintDiscuss')"
+              class="min-h-[36px] px-3 py-1 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold transition"
+            >
+              Guiding Hint (Q1 &amp; Q2)
+            </button>
+          </div>
+
+          <div id="hintDiscuss" class="hidden rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-950 space-y-1">
+            <p><strong>Q1 (Function of catalyst):</strong> <span class="font-mono">MnSO₄</span> supplies <span class="font-mono">Mn²⁺</span> ions which provide an alternative reaction pathway with a <strong>lower activation energy (<span class="font-mono">Eₐ</span>)</strong>, increasing the fraction of particles able to react without being chemically consumed.</p>
+            <p><strong>Q2 (Meaning of <span class="font-mono">1/t</span>):</strong> <span class="font-mono">1/t</span> (unit: <span class="font-mono">s⁻¹</span>) is directly proportional to the <strong>average rate of reaction</strong> because reaction rate is inversely proportional to the time taken for a fixed visual endpoint change.</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label for="repDiscussQ1" class="block text-xs font-bold text-slate-700 mb-1">
+                Question 1: What is the function of the catalyst in the above reactions?
+              </label>
+              <textarea
+                id="repDiscussQ1"
+                rows="3"
+                placeholder="Explain how MnSO4 (Mn2+ ions) affects activation energy (Ea) and reaction pathway..."
+                oninput="updateReportField('discussQ1', this.value)"
+                class="w-full rounded-xl border border-slate-300 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
+              ></textarea>
+            </div>
+            <div>
+              <label for="repDiscussQ2" class="block text-xs font-bold text-slate-700 mb-1">
+                Question 2: What does 1/t represent?
+              </label>
+              <textarea
+                id="repDiscussQ2"
+                rows="3"
+                placeholder="Explain what 1/t represents in kinetic measurements..."
+                oninput="updateReportField('discussQ2', this.value)"
+                class="w-full rounded-xl border border-slate-300 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ==============================================================
+           SECTION 7: CONCLUSION
+           ============================================================== -->
+      <article id="repSec7" class="scroll-mt-40 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2.5">
+            <span class="w-8 h-8 rounded-xl bg-slate-900 text-white font-extrabold text-sm flex items-center justify-center">7</span>
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Section 7 • Final Summary</span>
+              <h3 class="text-base sm:text-lg font-bold text-slate-900">Conclusion</h3>
+            </div>
+          </div>
+          <button
+            type="button"
+            onclick="toggleHint('hintClosing')"
+            class="min-h-[36px] px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 text-xs font-bold transition"
+          >
+            Guiding Hint
+          </button>
+        </div>
+
+        <div id="hintClosing" class="hidden rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-950">
+          Your conclusion must directly answer <strong>Section 2 (Objectives)</strong>: State clearly how (1) increasing reactant concentration, (2) increasing temperature, and (3) adding a catalyst (<span class="font-mono">MnSO₄</span>) affect the rate of reaction.
+        </div>
+
+        <textarea
+          id="repConclusion"
+          rows="3"
+          placeholder="Write a clear concluding statement summarizing how concentration, temperature, and catalyst affect the rate of reaction..."
+          oninput="updateReportField('conclusion', this.value)"
+          class="w-full rounded-xl border border-slate-300 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600"
+        ></textarea>
+
+        <!-- Bottom Export CTA Row -->
+        <div class="pt-3 flex flex-col sm:flex-row items-center justify-end gap-2.5">
+          <button
+            type="button"
+            onclick="openReportPreviewModal()"
+            class="w-full sm:w-auto min-h-[46px] px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-sm border border-slate-300 transition flex items-center justify-center gap-2"
+          >
+            <span>Preview Full Report</span>
+          </button>
+          <button
+            type="button"
+            onclick="generateDocxReport()"
+            class="w-full sm:w-auto min-h-[46px] px-6 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-600 text-white font-extrabold text-sm shadow-md transition flex items-center justify-center gap-2"
+          >
+            <span>Download Editable .DOCX</span>
+          </button>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <!-- ==================== TOAST NOTIFICATION ==================== -->
+  <div
+    id="toastBanner"
+    class="fixed bottom-20 sm:bottom-6 right-4 z-50 hidden bg-slate-900 text-white text-xs sm:text-sm font-semibold px-4 py-3 rounded-xl shadow-xl border border-teal-500/40 max-w-xs sm:max-w-sm no-print"
+    role="status"
+  ></div>
+
+  <!-- ==================== RESET CONFIRMATION MODAL ==================== -->
+  <div
+    id="resetModal"
+    class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 no-print"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-slate-200 space-y-4">
+      <h3 class="text-lg font-bold text-slate-900">Reset All Lab Data?</h3>
+      <p class="text-sm text-slate-600 leading-relaxed">
+        This will clear all entered timings, checklists, observations, passive procedure rewrites, and report answers saved in this browser.
+      </p>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button
+          type="button"
+          onclick="closeResetModal()"
+          class="min-h-[44px] px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          onclick="confirmResetAllData()"
+          class="min-h-[44px] px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm"
+        >
+          Yes, Clear Everything
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== FULL REPORT A4 PREVIEW MODAL ==================== -->
+  <div
+    id="reportPreviewModal"
+    class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 no-print"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div class="bg-slate-200 rounded-2xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-slate-300 overflow-hidden">
+      <!-- Modal Header -->
+      <div class="bg-slate-900 text-white px-4 py-3 flex flex-wrap items-center justify-between gap-2 shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-teal-500/20 text-teal-300 border border-teal-400/30">
+            A4 Document Preview
+          </span>
+          <h3 class="text-sm sm:text-base font-bold">SK025 Lab Report Preview (7 Sections)</h3>
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            onclick="printCleanReport()"
+            class="min-h-[38px] px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white border border-white/20 transition"
+          >
+            Print / PDF
+          </button>
+          <button
+            type="button"
+            onclick="generateDocxReport()"
+            class="min-h-[38px] px-3.5 py-1.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 text-xs font-extrabold transition"
+          >
+            Download .DOCX
+          </button>
+          <button
+            type="button"
+            onclick="closeReportPreviewModal()"
+            class="min-h-[38px] px-3 py-1.5 rounded-xl bg-rose-600/90 hover:bg-rose-600 text-xs font-bold text-white transition"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+
+      <!-- Scrollable A4 Sheet Container -->
+      <div class="p-3 sm:p-6 overflow-y-auto flex-1">
+        <div
+          id="a4PreviewSheet"
+          class="bg-white max-w-[210mm] mx-auto shadow-lg border border-slate-300 p-6 sm:p-10 text-slate-900 text-xs sm:text-sm leading-relaxed space-y-4"
+        ></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== CLEAN PRINT-FORMATTED REPORT CONTAINER ==================== -->
+  <div id="printReportArea" class="hidden"></div>
+
+  <!-- ==================== APPLICATION LOGIC ==================== -->
+  <script>
+    const STORAGE_KEY = 'sk025_exp1_rate_of_reaction_v3';
+
+    // Official SK025 Apparatus & Reagents Data
+    const APPARATUS_ITEMS = [
+      'Glass rod',
+      'Water bath',
+      'Stopwatch',
+      'Boiling tube (×4)',
+      'Thermometer',
+      '10 mL pipette',
+      '50 mL burette',
+      '10 mL measuring cylinder',
+      '100 mL conical flask',
+      "Laminated white paper with 'X' mark"
+    ];
+
+    const REAGENT_ITEMS = [
+      '0.1 M HCl',
+      '10% MnSO₄',
+      '2.0 M H₂SO₄',
+      '0.02 M KMnO₄',
+      '0.2 M Na₂S₂O₃',
+      '0.25 M H₂C₂O₄'
+    ];
+
+    // Step-by-Step Procedure Definitions
+    const PROCEDURE_PART_A = [
+      {
+        step: 1,
+        text: "Place 50 mL of 0.2 M sodium thiosulphate, Na₂S₂O₃ using a burette into a 100 mL conical flask. Put the conical flask on the white paper with 'X' mark.",
+        tip: "Ensure the burette tip is filled with no air bubbles before dispensing exactly 50.00 mL."
+      },
+      {
+        step: 2,
+        text: "Pipette 10 mL of 0.1 M HCl into the conical flask and immediately start the stopwatch. Stir continuously with a glass rod until the mark is no longer visible and record the time. Note: The 'X' mark should be observed from the top of the conical flask.",
+        tip: "Start the stopwatch at the exact moment HCl meets Na₂S₂O₃, and maintain a consistent swirling speed."
+      },
+      {
+        step: 3,
+        text: "Repeat steps 1 till 2 with the addition of distilled water to the sodium thiosulphate as instructed in Table 1.1 (40/10, 30/20, 20/30, and 10/40 mL).",
+        tip: "Rinse and dry the conical flask thoroughly between runs so residual sulfur does not nucleate early precipitation."
+      }
+    ];
+
+    const PROCEDURE_PART_B = [
+      {
+        step: 1,
+        text: "Label 4 boiling tubes as A1, A2, B1 and B2.",
+        tip: "Clear labelling prevents mixing up the catalysed (B2) and uncatalysed (B1) permanganate tubes."
+      },
+      {
+        step: 2,
+        text: "Place 10 mL of 0.25 M oxalic acid, H₂C₂O₄ solution into boiling tubes A1 and A2.",
+        tip: "Use a clean 10 mL pipette or measuring cylinder to dispense 10.0 mL accurately."
+      },
+      {
+        step: 3,
+        text: "Fill boiling tubes B1 and B2 with 5 mL of 0.02 M KMnO₄ solution. Then add 10 mL of 2.0 M H₂SO₄ solution to both tubes.",
+        tip: "Sulfuric acid provides the acidic H⁺ medium required for complete reduction of MnO₄⁻ to colourless Mn²⁺."
+      },
+      {
+        step: 4,
+        text: "Add 5 drops of 10% MnSO₄ solution to B2. Stir the mixture.",
+        tip: "Only B2 receives MnSO₄ catalyst; B1 acts as the uncatalysed control."
+      },
+      {
+        step: 5,
+        text: "Place tubes A1 and B1 in a water bath at temperature of 30°C for about 3 minutes.",
+        tip: "Waiting 3 minutes ensures both reactant solutions reach thermal equilibrium with the water bath."
+      },
+      {
+        step: 6,
+        text: "While tube A1 is still in the water bath, pour the solutions from tube B1 into tube A1. Start the stopwatch immediately.",
+        tip: "Keeping A1 immersed inside the water bath prevents sudden cooling during the reaction."
+      },
+      {
+        step: 7,
+        text: "Record the time taken for the mixture to turn colourless.",
+        tip: "Place a white tile/paper behind the bath if needed to spot the exact moment the faint pink tint vanishes."
+      },
+      {
+        step: 8,
+        text: "Repeat Steps 5 till 7 for tubes A2 and B2.",
+        tip: "Notice how much faster A2 + B2 decolourizes compared to A1 + B1 at the same temperature."
+      },
+      {
+        step: 9,
+        text: "Follow Steps 2 till 7 for the temperatures of 35°C, 40°C and 50°C. Record your results in Table 1.2.",
+        tip: "Verify the water bath thermometer reading before each temperature set."
+      }
+    ];
+
+    // Table 1.1 Base Volumes
+    const TABLE1_BASE = [
+      { vNa2S2O3: 50.0, vWater: 0.0, vHCl: 10.0 },
+      { vNa2S2O3: 40.0, vWater: 10.0, vHCl: 10.0 },
+      { vNa2S2O3: 30.0, vWater: 20.0, vHCl: 10.0 },
+      { vNa2S2O3: 20.0, vWater: 30.0, vHCl: 10.0 },
+      { vNa2S2O3: 10.0, vWater: 40.0, vHCl: 10.0 }
+    ];
+
+    const TABLE2_TEMPS = [30, 35, 40, 50];
+
+    // Passive Past Tense Model Sentences & Skill Drill Data
+    const MODEL_PASSIVE_PART_A = [
+      "50.00 mL of 0.2 M sodium thiosulphate, Na₂S₂O₃ solution was placed into a 100 mL conical flask using a burette, and the flask was placed on a laminated white paper marked with an 'X'.",
+      "10.00 mL of 0.1 M HCl was pipetted into the conical flask and the stopwatch was started immediately. The mixture was stirred continuously with a glass rod while being observed from the top until the 'X' mark was no longer visible, and the time taken was recorded.",
+      "Steps 1 and 2 were repeated with the addition of distilled water to the sodium thiosulphate solution as specified in Table 1.1."
+    ];
+
+    const MODEL_PASSIVE_PART_B = [
+      "Four clean boiling tubes were labelled as A1, A2, B1, and B2.",
+      "10.00 mL of 0.25 M oxalic acid, H₂C₂O₄ solution was placed into boiling tubes A1 and A2.",
+      "Boiling tubes B1 and B2 were filled with 5.00 mL of 0.02 M KMnO₄ solution, followed by the addition of 10.00 mL of 2.0 M H₂SO₄ solution to both tubes.",
+      "5 drops of 10% MnSO₄ solution were added to boiling tube B2 and the mixture was stirred gently.",
+      "Boiling tubes A1 and B1 were placed in a thermostated water bath at 30°C for about 3 minutes.",
+      "While boiling tube A1 was still immersed in the water bath, the solution from tube B1 was poured into tube A1 and the stopwatch was started immediately.",
+      "The time taken for the purple mixture to turn colourless was recorded.",
+      "Steps 5 to 7 were repeated for boiling tubes A2 and B2 at 30°C.",
+      "Steps 2 to 7 were repeated for water bath temperatures of 35°C, 40°C, and 50°C, and all results were recorded in Table 1.2."
+    ];
+
+    const THEORY_CONCEPTS_META = [
+      { id: 0, label: 'Definition of reaction rate (Δ concentration / time)', regex: /(change\s+in\s+concentration|per\s+unit\s+time|rate\s+of\s+reaction)/i },
+      { id: 1, label: 'Factors influencing rate (concentration, temperature, catalyst, etc.)', regex: /(factor|concentration|temperature|catalyst|particle|pressure)/i },
+      { id: 2, label: 'Observation of chemical or physical property changes', regex: /(observ|physical|chemical|precipitate|colour|decolouri|turbid)/i },
+      { id: 3, label: 'Inverse proportionality between rate and time (Rate ∝ 1/t)', regex: /(inverse|1\/t|shorter|faster)/i },
+      { id: 4, label: 'Balanced chemical equations / species studied (Na₂S₂O₃ & KMnO₄)', regex: /(na2s2o3|thiosulphate|kmno4|permanganate|oxalic|h2c2o4)/i }
+    ];
+
+    const PASSIVE_QUIZ_ITEMS = [
+      {
+        prompt: 'Rewrite: "Pipette 10 mL of 0.1 M HCl into the conical flask."',
+        options: [
+          '10.00 mL of 0.1 M HCl was pipetted into the conical flask.',
+          'We pipetted 10 mL of 0.1 M HCl into the conical flask.',
+          'Pipetted 10 mL of 0.1 M HCl into the conical flask.'
+        ],
+        correctIdx: 0,
+        explanation: 'Correct! Subject ("10.00 mL of 0.1 M HCl") + singular past auxiliary ("was") + past participle ("pipetted"), with no personal pronoun ("we").'
+      },
+      {
+        prompt: 'Rewrite: "Label 4 boiling tubes as A1, A2, B1 and B2."',
+        options: [
+          'Four boiling tubes was labelled as A1, A2, B1 and B2.',
+          'Four boiling tubes were labelled as A1, A2, B1, and B2.',
+          'You label four boiling tubes as A1, A2, B1 and B2.'
+        ],
+        correctIdx: 1,
+        explanation: 'Correct! Because "four boiling tubes" is plural, use "were" + past participle ("labelled").'
+      },
+      {
+        prompt: 'Rewrite: "Pour the solution from tube B1 into tube A1 and start the stopwatch."',
+        options: [
+          'I poured the solution from tube B1 into tube A1 and started the stopwatch.',
+          'Pouring the solution from tube B1 into tube A1, start the stopwatch.',
+          'The solution from tube B1 was poured into tube A1 and the stopwatch was started immediately.'
+        ],
+        correctIdx: 2,
+        explanation: 'Correct! Both actions are converted into passive past tense ("was poured" and "was started") without personal pronouns.'
+      }
+    ];
+
+    // Default Application State
+    function getDefaultState() {
+      return {
+        activeTab: 'tab1',
+        procPart: 'A',
+        concMode: '50',
+        student: {
+          name: '',
+          matric: '',
+          group: '',
+          date: new Date().toISOString().split('T')[0],
+          lecturer: ''
+        },
+        apparatusChecked: Array(APPARATUS_ITEMS.length).fill(false),
+        reagentsChecked: Array(REAGENT_ITEMS.length).fill(false),
+        stepsAChecked: Array(PROCEDURE_PART_A.length).fill(false),
+        stepsBChecked: Array(PROCEDURE_PART_B.length).fill(false),
+        observations: {
+          partA: '',
+          partB: ''
+        },
+        table1Times: ['', '', '', '', ''],
+        table2Times: [
+          { noCat: '', cat: '' },
+          { noCat: '', cat: '' },
+          { noCat: '', cat: '' },
+          { noCat: '', cat: '' }
+        ],
+        report: {
+          objectives: 'To study the effect of concentration, temperature, and catalyst on the reaction rate.',
+          theorySummary: '',
+          theoryConcepts: [false, false, false, false, false],
+          procPartARewrites: ['', '', ''],
+          procPartBRewrites: ['', '', '', '', '', '', '', '', ''],
+          procViewMode: 'steps',
+          procQuizAnswers: [null, null, null],
+          partARelationship: '',
+          partBTemp: '',
+          partBCatalyst: '',
+          discussionTheoryObs: '',
+          precautions: '',
+          discussQ1: '',
+          discussQ2: '',
+          conclusion: ''
+        },
+        stopwatch: {
+          accumulatedMs: 0,
+          targetCell: 't1_0',
+          expanded: true
+        }
+      };
+    }
+
+    let state = loadState();
+    let chart1Instance = null;
+    let chart2Instance = null;
+    let chart1ReportInstance = null;
+    let chart2ReportInstance = null;
+    let showAllModelsFlag = false;
+
+    // Stopwatch runtime variables
+    let swRunning = false;
+    let swStartPerf = 0;
+    let swRafId = null;
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return getDefaultState();
+        const parsed = JSON.parse(raw);
+        const def = getDefaultState();
+        return {
+          ...def,
+          ...parsed,
+          student: { ...def.student, ...(parsed.student || {}) },
+          observations: { ...def.observations, ...(parsed.observations || {}) },
+          report: {
+            ...def.report,
+            ...(parsed.report || {}),
+            theoryConcepts: Array.isArray(parsed.report?.theoryConcepts)
+              ? parsed.report.theoryConcepts
+              : def.report.theoryConcepts,
+            procPartARewrites: Array.isArray(parsed.report?.procPartARewrites)
+              ? parsed.report.procPartARewrites
+              : def.report.procPartARewrites,
+            procPartBRewrites: Array.isArray(parsed.report?.procPartBRewrites)
+              ? parsed.report.procPartBRewrites
+              : def.report.procPartBRewrites,
+            procQuizAnswers: Array.isArray(parsed.report?.procQuizAnswers)
+              ? parsed.report.procQuizAnswers
+              : def.report.procQuizAnswers
+          },
+          stopwatch: { ...def.stopwatch, ...(parsed.stopwatch || {}) }
+        };
+      } catch (e) {
+        return getDefaultState();
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        // Ignore storage quota errors
+      }
+    }
+
+    let toastTimeout = null;
+    function showToast(msg) {
+      const el = document.getElementById('toastBanner');
+      if (!el) return;
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        el.classList.add('hidden');
+      }, 3000);
+    }
+
+    // ==================== NAVIGATION & STUDENT DETAILS ====================
+    function switchTab(tabId) {
+      state.activeTab = tabId;
+      saveState();
+
+      document.querySelectorAll('.tab-panel').forEach((panel) => {
+        panel.classList.toggle('hidden', panel.id !== tabId);
+      });
+
+      document.querySelectorAll('.nav-tab-btn').forEach((btn) => {
+        const active = btn.dataset.tab === tabId;
+        btn.className = active
+          ? 'nav-tab-btn px-4 py-2 rounded-xl text-sm font-bold bg-teal-500 text-slate-950 shadow transition flex items-center gap-2'
+          : 'nav-tab-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-300 hover:bg-white/10 hover:text-white transition flex items-center gap-2';
+      });
+
+      document.querySelectorAll('.mobile-tab-btn').forEach((btn) => {
+        const active = btn.dataset.tab === tabId;
+        btn.className = active
+          ? 'mobile-tab-btn min-h-[52px] rounded-xl flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold bg-teal-500 text-slate-950 transition'
+          : 'mobile-tab-btn min-h-[52px] rounded-xl flex flex-col items-center justify-center gap-0.5 text-[11px] font-semibold text-slate-300 hover:bg-slate-800 transition';
+      });
+
+      if (tabId === 'tab3') {
+        updateCharts();
+      }
+      if (tabId === 'tab4') {
+        renderReportBuilder();
+      }
+    }
+
+    function toggleStudentBar() {
+      const grid = document.getElementById('studentDetailsGrid');
+      const btn = document.getElementById('toggleStudentBarBtn');
+      const isHidden = grid.classList.toggle('hidden');
+      btn.textContent = isHidden ? 'Show' : 'Hide';
+    }
+
+    function updateStudentField(field, value) {
+      state.student[field] = value;
+      saveState();
+      const map = {
+        name: 'repTitleName',
+        matric: 'repTitleMatric',
+        group: 'repTitleGroup',
+        date: 'repTitleDate',
+        lecturer: 'repTitleLecturer'
+      };
+      const el = document.getElementById(map[field]);
+      if (el && el.value !== value) el.value = value;
+      updateReportReadiness();
+    }
+
+    function syncTitleMetadata(field, value) {
+      state.student[field] = value;
+      saveState();
+      const topMap = {
+        name: 'studentName',
+        matric: 'studentMatric',
+        group: 'studentGroup',
+        date: 'studentDate'
+      };
+      if (topMap[field]) {
+        const topEl = document.getElementById(topMap[field]);
+        if (topEl && topEl.value !== value) topEl.value = value;
+      }
+      updateReportReadiness();
+    }
+
+    // ==================== DIGITAL LAB STOPWATCH ====================
+    function getElapsedMs() {
+      if (!swRunning) return state.stopwatch.accumulatedMs;
+      return state.stopwatch.accumulatedMs + (performance.now() - swStartPerf);
+    }
+
+    function formatStopwatchMs(ms) {
+      const totalCentis = Math.floor(ms / 10);
+      const centis = totalCentis % 100;
+      const totalSec = Math.floor(totalCentis / 100);
+      const secs = totalSec % 60;
+      const mins = Math.floor(totalSec / 60);
+      return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(centis).padStart(2, '0')}`;
+    }
+
+    function renderStopwatchUI() {
+      const disp = document.getElementById('swDisplay');
+      const dot = document.getElementById('swStatusDot');
+      if (disp) disp.textContent = formatStopwatchMs(getElapsedMs());
+      if (dot) {
+        dot.className = swRunning
+          ? 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping'
+          : getElapsedMs() > 0
+          ? 'w-2.5 h-2.5 rounded-full bg-amber-400'
+          : 'w-2.5 h-2.5 rounded-full bg-slate-500';
+      }
+    }
+
+    function tickStopwatch() {
+      renderStopwatchUI();
+      if (swRunning) {
+        swRafId = requestAnimationFrame(tickStopwatch);
+      }
+    }
+
+    function startStopwatch() {
+      if (swRunning) return;
+      swRunning = true;
+      swStartPerf = performance.now();
+      tickStopwatch();
+    }
+
+    function stopStopwatch() {
+      if (!swRunning) return;
+      state.stopwatch.accumulatedMs += performance.now() - swStartPerf;
+      swRunning = false;
+      if (swRafId) cancelAnimationFrame(swRafId);
+      saveState();
+      renderStopwatchUI();
+    }
+
+    function resetStopwatch() {
+      swRunning = false;
+      if (swRafId) cancelAnimationFrame(swRafId);
+      state.stopwatch.accumulatedMs = 0;
+      saveState();
+      renderStopwatchUI();
+    }
+
+    function toggleStopwatchExpand(forceState) {
+      const next = typeof forceState === 'boolean' ? forceState : !state.stopwatch.expanded;
+      state.stopwatch.expanded = next;
+      saveState();
+      const body = document.getElementById('swBody');
+      const btn = document.getElementById('swExpandBtn');
+      if (body) body.classList.toggle('hidden', !next);
+      if (btn) btn.textContent = next ? 'Minimize' : 'Expand';
+    }
+
+    function setStopwatchTarget(val) {
+      state.stopwatch.targetCell = val;
+      saveState();
+    }
+
+    function assignStopwatchToTable() {
+      if (swRunning) stopStopwatch();
+      const secs = (getElapsedMs() / 1000).toFixed(2);
+      if (parseFloat(secs) <= 0) {
+        showToast('Start and stop the stopwatch first before sending time.');
+        return;
+      }
+
+      const target = state.stopwatch.targetCell || 't1_0';
+      const parts = target.split('_');
+
+      if (parts[0] === 't1') {
+        const idx = parseInt(parts[1], 10);
+        state.table1Times[idx] = secs;
+        saveState();
+        renderTables();
+        updateCharts();
+        showToast(`Sent ${secs} s to Table 1.1 (Run ${idx + 1})`);
+      } else if (parts[0] === 't2') {
+        const key = parts[1] === 'no' ? 'noCat' : 'cat';
+        const idx = parseInt(parts[2], 10);
+        state.table2Times[idx][key] = secs;
+        saveState();
+        renderTables();
+        updateCharts();
+        showToast(`Sent ${secs} s to Table 1.2 (${TABLE2_TEMPS[idx]}°C)`);
+      }
+    }
+
+    // ==================== TAB 1: CHECKLISTS ====================
+    function renderChecklists() {
+      const appList = document.getElementById('apparatusList');
+      const regList = document.getElementById('reagentList');
+
+      if (appList) {
+        appList.innerHTML = APPARATUS_ITEMS.map((item, idx) => {
+          const checked = Boolean(state.apparatusChecked[idx]);
+          return `
+            <label class="flex items-center gap-2.5 min-h-[44px] px-3 py-2 rounded-xl border text-xs sm:text-sm cursor-pointer transition select-none ${
+              checked
+                ? 'bg-teal-50 border-teal-300 text-teal-950 font-semibold'
+                : 'bg-slate-50/70 border-slate-200 text-slate-700 hover:bg-slate-100'
+            }">
+              <input
+                type="checkbox"
+                ${checked ? 'checked' : ''}
+                onchange="toggleApparatus(${idx})"
+                class="w-4 h-4 rounded accent-teal-600 shrink-0"
+              />
+              <span>${item}</span>
+            </label>
+          `;
+        }).join('');
+      }
+
+      if (regList) {
+        regList.innerHTML = REAGENT_ITEMS.map((item, idx) => {
+          const checked = Boolean(state.reagentsChecked[idx]);
+          return `
+            <label class="flex items-center gap-2.5 min-h-[44px] px-3 py-2 rounded-xl border text-xs sm:text-sm cursor-pointer transition select-none ${
+              checked
+                ? 'bg-indigo-50 border-indigo-300 text-indigo-950 font-semibold'
+                : 'bg-slate-50/70 border-slate-200 text-slate-700 hover:bg-slate-100'
+            }">
+              <input
+                type="checkbox"
+                ${checked ? 'checked' : ''}
+                onchange="toggleReagent(${idx})"
+                class="w-4 h-4 rounded accent-indigo-600 shrink-0"
+              />
+              <span class="font-mono text-xs sm:text-sm">${item}</span>
+            </label>
+          `;
+        }).join('');
+      }
+
+      const appDone = state.apparatusChecked.filter(Boolean).length;
+      const regDone = state.reagentsChecked.filter(Boolean).length;
+      const appBadge = document.getElementById('apparatusCountBadge');
+      const regBadge = document.getElementById('reagentCountBadge');
+      if (appBadge) appBadge.textContent = `${appDone} / ${APPARATUS_ITEMS.length}`;
+      if (regBadge) regBadge.textContent = `${regDone} / ${REAGENT_ITEMS.length}`;
+    }
+
+    function toggleApparatus(idx) {
+      state.apparatusChecked[idx] = !state.apparatusChecked[idx];
+      saveState();
+      renderChecklists();
+    }
+
+    function toggleReagent(idx) {
+      state.reagentsChecked[idx] = !state.reagentsChecked[idx];
+      saveState();
+      renderChecklists();
+    }
+
+    function checkAllChecklist(type) {
+      if (type === 'apparatus') {
+        const allTrue = state.apparatusChecked.every(Boolean);
+        state.apparatusChecked = Array(APPARATUS_ITEMS.length).fill(!allTrue);
+      } else {
+        const allTrue = state.reagentsChecked.every(Boolean);
+        state.reagentsChecked = Array(REAGENT_ITEMS.length).fill(!allTrue);
+      }
+      saveState();
+      renderChecklists();
+    }
+
+    // ==================== TAB 2: INTERACTIVE PROCEDURE ====================
+    function switchProcedurePart(part) {
+      state.procPart = part;
+      saveState();
+
+      const btnA = document.getElementById('procPartABtn');
+      const btnB = document.getElementById('procPartBBtn');
+      const panelA = document.getElementById('procPanelA');
+      const panelB = document.getElementById('procPanelB');
+
+      if (part === 'A') {
+        btnA.className = 'min-h-[46px] px-4 py-2 rounded-xl font-bold text-xs sm:text-sm bg-teal-700 text-white shadow transition';
+        btnB.className = 'min-h-[46px] px-4 py-2 rounded-xl font-bold text-xs sm:text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
+        panelA.classList.remove('hidden');
+        panelB.classList.add('hidden');
+      } else {
+        btnB.className = 'min-h-[46px] px-4 py-2 rounded-xl font-bold text-xs sm:text-sm bg-indigo-700 text-white shadow transition';
+        btnA.className = 'min-h-[46px] px-4 py-2 rounded-xl font-bold text-xs sm:text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
+        panelB.classList.remove('hidden');
+        panelA.classList.add('hidden');
+      }
+
+      updateProcedureProgress();
+    }
+
+    function updateProcedureProgress() {
+      const lbl = document.getElementById('procProgressLabel');
+      if (!lbl) return;
+      if (state.procPart === 'A') {
+        const done = state.stepsAChecked.filter(Boolean).length;
+        lbl.textContent = `Part (A) Completed: ${done} / ${PROCEDURE_PART_A.length} steps`;
+      } else {
+        const done = state.stepsBChecked.filter(Boolean).length;
+        lbl.textContent = `Part (B) Completed: ${done} / ${PROCEDURE_PART_B.length} steps`;
+      }
+    }
+
+    function renderProcedureSteps() {
+      const renderList = (items, checkedArr, partKey) => {
+        return items
+          .map((item, idx) => {
+            const done = Boolean(checkedArr[idx]);
+            const tipId = `procTip_${partKey}_${idx}`;
+            return `
+              <div class="rounded-2xl border p-4 transition ${
+                done ? 'bg-emerald-50/70 border-emerald-300' : 'bg-white border-slate-200 shadow-sm'
+              }">
+                <div class="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    ${done ? 'checked' : ''}
+                    onchange="toggleStepCheck('${partKey}', ${idx})"
+                    class="mt-1 w-5 h-5 rounded accent-teal-600 shrink-0 cursor-pointer"
+                  />
+                  <div class="flex-1 space-y-2">
+                    <div class="flex items-center justify-between gap-2">
+                      <span class="text-xs font-extrabold uppercase tracking-wider ${
+                        partKey === 'A' ? 'text-teal-700' : 'text-indigo-700'
+                      }">
+                        Step ${item.step}
+                      </span>
+                      <button
+                        type="button"
+                        onclick="toggleHint('${tipId}')"
+                        class="text-[11px] font-semibold text-slate-500 hover:text-teal-700 underline"
+                      >
+                        Why this matters
+                      </button>
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-800 leading-relaxed ${done ? 'line-through text-slate-500' : ''}">
+                      ${item.text}
+                    </p>
+                    <div id="${tipId}" class="hidden rounded-xl bg-amber-50 border border-amber-200 p-2.5 text-xs text-amber-950">
+                      <strong>Lab Tip:</strong> ${item.tip}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          })
+          .join('');
+      };
+
+      const contA = document.getElementById('stepsContainerA');
+      const contB = document.getElementById('stepsContainerB');
+      if (contA) contA.innerHTML = renderList(PROCEDURE_PART_A, state.stepsAChecked, 'A');
+      if (contB) contB.innerHTML = renderList(PROCEDURE_PART_B, state.stepsBChecked, 'B');
+      updateProcedureProgress();
+    }
+
+    function toggleStepCheck(part, idx) {
+      if (part === 'A') {
+        state.stepsAChecked[idx] = !state.stepsAChecked[idx];
+      } else {
+        state.stepsBChecked[idx] = !state.stepsBChecked[idx];
+      }
+      saveState();
+      renderProcedureSteps();
+    }
+
+    function toggleHint(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('hidden');
+    }
+
+    // ==================== TAB 3: OBSERVATIONS, DATA TABLES & CHARTS ====================
+    function updateObservation(part, val) {
+      state.observations[part] = val;
+      saveState();
+    }
+
+    function getCalculatedConcentration(vNa2S2O3) {
+      const vTotal = state.concMode === '60' ? 60.0 : 50.0;
+      return (0.2 * vNa2S2O3) / vTotal;
+    }
+
+    function formatRate(timeVal) {
+      const num = parseFloat(timeVal);
+      if (isNaN(num) || num <= 0) return '—';
+      return (1 / num).toFixed(4);
+    }
+
+    function setConcMode(mode) {
+      state.concMode = mode;
+      saveState();
+      renderTables();
+      updateCharts();
+      if (state.activeTab === 'tab4') {
+        renderSyncedReportTablesAndCalc();
+      }
+    }
+
+    function renderTables() {
+      const btn50 = document.getElementById('concMode50Btn');
+      const btn60 = document.getElementById('concMode60Btn');
+      if (btn50 && btn60) {
+        if (state.concMode === '50') {
+          btn50.className = 'min-h-[36px] px-2.5 py-1 rounded-lg text-xs font-bold bg-teal-700 text-white shadow-sm transition';
+          btn60.className = 'min-h-[36px] px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition';
+        } else {
+          btn60.className = 'min-h-[36px] px-2.5 py-1 rounded-lg text-xs font-bold bg-teal-700 text-white shadow-sm transition';
+          btn50.className = 'min-h-[36px] px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition';
+        }
+      }
+
+      const t1Body = document.getElementById('table1Body');
+      if (t1Body) {
+        t1Body.innerHTML = TABLE1_BASE.map((row, idx) => {
+          const conc = getCalculatedConcentration(row.vNa2S2O3).toFixed(3);
+          const tVal = state.table1Times[idx] || '';
+          return `
+            <tr class="hover:bg-slate-50">
+              <td class="py-2.5 px-3 text-center font-bold text-slate-600">${idx + 1}</td>
+              <td class="py-2.5 px-3 text-right font-mono">${row.vNa2S2O3.toFixed(2)}</td>
+              <td class="py-2.5 px-3 text-right font-mono">${row.vWater.toFixed(2)}</td>
+              <td class="py-2.5 px-3 text-right font-mono font-bold text-teal-800 bg-teal-50/60">${conc}</td>
+              <td class="py-2.5 px-3 text-right font-mono">${row.vHCl.toFixed(2)}</td>
+              <td class="py-2 px-3 text-center bg-indigo-50/40">
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  inputmode="decimal"
+                  placeholder="0.00"
+                  value="${tVal}"
+                  oninput="updateTable1Time(${idx}, this.value)"
+                  class="w-24 min-h-[40px] px-2.5 py-1 rounded-lg border border-slate-300 text-right font-mono font-bold text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                />
+              </td>
+              <td id="t1_rate_${idx}" class="py-2.5 px-3 text-right font-mono font-bold text-slate-900">${formatRate(tVal)}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      const t2Body = document.getElementById('table2Body');
+      if (t2Body) {
+        t2Body.innerHTML = TABLE2_TEMPS.map((temp, idx) => {
+          const row = state.table2Times[idx];
+          return `
+            <tr class="hover:bg-slate-50">
+              <td class="py-2.5 px-3 text-center font-mono font-extrabold bg-slate-50 text-slate-800">${temp}°C</td>
+              <td class="py-2 px-3 text-center bg-indigo-50/30">
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  inputmode="decimal"
+                  placeholder="0.00"
+                  value="${row.noCat || ''}"
+                  oninput="updateTable2Time(${idx}, 'noCat', this.value)"
+                  class="w-24 min-h-[40px] px-2.5 py-1 rounded-lg border border-slate-300 text-right font-mono font-bold text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                />
+              </td>
+              <td id="t2_rate_noCat_${idx}" class="py-2.5 px-3 text-right font-mono font-bold text-indigo-800 bg-indigo-50/50">${formatRate(row.noCat)}</td>
+              <td class="py-2 px-3 text-center bg-teal-50/30">
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  inputmode="decimal"
+                  placeholder="0.00"
+                  value="${row.cat || ''}"
+                  oninput="updateTable2Time(${idx}, 'cat', this.value)"
+                  class="w-24 min-h-[40px] px-2.5 py-1 rounded-lg border border-slate-300 text-right font-mono font-bold text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-teal-600"
+                />
+              </td>
+              <td id="t2_rate_cat_${idx}" class="py-2.5 px-3 text-right font-mono font-bold text-teal-800 bg-teal-50/50">${formatRate(row.cat)}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    function updateTable1Time(idx, val) {
+      state.table1Times[idx] = val;
+      saveState();
+      const rateCell = document.getElementById(`t1_rate_${idx}`);
+      if (rateCell) rateCell.textContent = formatRate(val);
+      updateCharts();
+      if (state.activeTab === 'tab4') {
+        renderSyncedReportTablesAndCalc();
+      }
+    }
+
+    function updateTable2Time(idx, key, val) {
+      state.table2Times[idx][key] = val;
+      saveState();
+      const rateCell = document.getElementById(`t2_rate_${key}_${idx}`);
+      if (rateCell) rateCell.textContent = formatRate(val);
+      updateCharts();
+      if (state.activeTab === 'tab4') {
+        renderSyncedReportTablesAndCalc();
+      }
+    }
+
+    // Chart Data Helpers
+    function getGraph1Points() {
+      const pts = [];
+      TABLE1_BASE.forEach((row, idx) => {
+        const t = parseFloat(state.table1Times[idx]);
+        if (!isNaN(t) && t > 0) {
+          pts.push({
+            x: Number(getCalculatedConcentration(row.vNa2S2O3).toFixed(4)),
+            y: Number((1 / t).toFixed(4))
+          });
+        }
+      });
+      return pts.sort((a, b) => a.x - b.x);
+    }
+
+    function getGraph2Points() {
+      const noCatPts = [];
+      const catPts = [];
+      TABLE2_TEMPS.forEach((temp, idx) => {
+        const tNo = parseFloat(state.table2Times[idx].noCat);
+        const tCat = parseFloat(state.table2Times[idx].cat);
+        if (!isNaN(tNo) && tNo > 0) {
+          noCatPts.push({ x: temp, y: Number((1 / tNo).toFixed(4)) });
+        }
+        if (!isNaN(tCat) && tCat > 0) {
+          catPts.push({ x: temp, y: Number((1 / tCat).toFixed(4)) });
+        }
+      });
+      return { noCatPts, catPts };
+    }
+
+    function initCharts() {
+      if (typeof Chart === 'undefined') return;
+      const c1 = document.getElementById('chart1Canvas');
+      const c2 = document.getElementById('chart2Canvas');
+
+      if (c1) {
+        chart1Instance = new Chart(c1.getContext('2d'), {
+          type: 'line',
+          data: {
+            datasets: [
+              {
+                label: 'Rate of Reaction, 1/t (s⁻¹)',
+                data: getGraph1Points(),
+                borderColor: '#0f766e',
+                backgroundColor: 'rgba(15, 118, 110, 0.15)',
+                pointBackgroundColor: '#0f766e',
+                pointRadius: 5,
+                borderWidth: 2.5,
+                tension: 0.15,
+                fill: true
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                type: 'linear',
+                min: 0,
+                title: { display: true, text: 'Concentration of Na₂S₂O₃ (M)', font: { weight: '700' } }
+              },
+              y: {
+                beginAtZero: true,
+                title: { display: true, text: 'Rate of Reaction, 1/t (s⁻¹)', font: { weight: '700' } }
+              }
+            }
+          }
+        });
+      }
+
+      if (c2) {
+        const g2 = getGraph2Points();
+        chart2Instance = new Chart(c2.getContext('2d'), {
+          type: 'line',
+          data: {
+            datasets: [
+              {
+                label: '(A1 + B1) Without Catalyst MnSO₄',
+                data: g2.noCatPts,
+                borderColor: '#3730a3',
+                backgroundColor: 'rgba(55, 48, 163, 0.1)',
+                pointBackgroundColor: '#3730a3',
+                pointRadius: 5,
+                borderWidth: 2.5,
+                tension: 0.2
+              },
+              {
+                label: '(A2 + B2) With Catalyst MnSO₄',
+                data: g2.catPts,
+                borderColor: '#0f766e',
+                backgroundColor: 'rgba(15, 118, 110, 0.12)',
+                pointBackgroundColor: '#0f766e',
+                pointRadius: 5,
+                borderWidth: 2.5,
+                tension: 0.2
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                type: 'linear',
+                min: 28,
+                max: 52,
+                title: { display: true, text: 'Temperature (°C)', font: { weight: '700' } }
+              },
+              y: {
+                beginAtZero: true,
+                title: { display: true, text: 'Rate of Reaction, 1/t (s⁻¹)', font: { weight: '700' } }
+              }
+            }
+          }
+        });
+      }
+    }
+
+    function updateCharts() {
+      if (chart1Instance) {
+        chart1Instance.data.datasets[0].data = getGraph1Points();
+        chart1Instance.update();
+      }
+      if (chart2Instance) {
+        const g2 = getGraph2Points();
+        chart2Instance.data.datasets[0].data = g2.noCatPts;
+        chart2Instance.data.datasets[1].data = g2.catPts;
+        chart2Instance.update();
+      }
+      if (chart1ReportInstance) {
+        chart1ReportInstance.data.datasets[0].data = getGraph1Points();
+        chart1ReportInstance.update();
+      }
+      if (chart2ReportInstance) {
+        const g2 = getGraph2Points();
+        chart2ReportInstance.data.datasets[0].data = g2.noCatPts;
+        chart2ReportInstance.data.datasets[1].data = g2.catPts;
+        chart2ReportInstance.update();
+      }
+    }
+
+    // ==================== TAB 4: 7-SECTION REPORT BUILDER & .DOCX EXPORT ====================
+    function updateReportField(field, value) {
+      state.report[field] = value;
+      saveState();
+      updateReportReadiness();
+    }
+
+    function resetDefaultObjectives() {
+      const defObj = 'To study the effect of concentration, temperature, and catalyst on the reaction rate.';
+      state.report.objectives = defObj;
+      const el = document.getElementById('repObjectives');
+      if (el) el.value = defObj;
+      saveState();
+      updateReportReadiness();
+      showToast('Restored standard SK025 objective.');
+    }
+
+    // --- Section 3: Theory Summarizer Logic ---
+    function updateTheorySummary(val) {
+      state.report.theorySummary = val;
+      THEORY_CONCEPTS_META.forEach((item, idx) => {
+        if (item.regex.test(val)) {
+          state.report.theoryConcepts[idx] = true;
+        }
+      });
+      saveState();
+      renderTheoryConcepts();
+      updateReportReadiness();
+    }
+
+    function toggleTheoryConcept(idx) {
+      state.report.theoryConcepts[idx] = !state.report.theoryConcepts[idx];
+      saveState();
+      renderTheoryConcepts();
+    }
+
+    function renderTheoryConcepts() {
+      const container = document.getElementById('theoryConceptChecklist');
+      if (!container) return;
+
+      container.innerHTML = THEORY_CONCEPTS_META.map((item, idx) => {
+        const checked = Boolean(state.report.theoryConcepts[idx]);
+        return `
+          <label class="flex items-center gap-2.5 px-3 py-2 rounded-xl border text-xs cursor-pointer transition select-none ${
+            checked
+              ? 'bg-emerald-50 border-emerald-300 text-emerald-950 font-semibold'
+              : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100/70'
+          }">
+            <input
+              type="checkbox"
+              ${checked ? 'checked' : ''}
+              onchange="toggleTheoryConcept(${idx})"
+              class="w-4 h-4 rounded accent-emerald-600 shrink-0"
+            />
+            <span>${item.label}</span>
+          </label>
+        `;
+      }).join('');
+
+      const words = (state.report.theorySummary || '')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean).length;
+      const wordBadge = document.getElementById('theoryWordCountBadge');
+      if (wordBadge) wordBadge.textContent = `${words} ${words === 1 ? 'word' : 'words'}`;
+
+      const checkedCount = state.report.theoryConcepts.filter(Boolean).length;
+      const scoreEl = document.getElementById('theoryConceptScore');
+      if (scoreEl) scoreEl.textContent = `${checkedCount} / ${THEORY_CONCEPTS_META.length} key concepts included`;
+    }
+
+    // --- Section 4: Passive Past Tense Analyzer & Rewriter Logic ---
+    function analyzePassivePastTense(text) {
+      const clean = (text || '').trim();
+      if (!clean) {
+        return {
+          status: 'empty',
+          badgeClass: 'bg-slate-100 text-slate-600 border-slate-200',
+          label: 'Awaiting passive rewrite'
+        };
+      }
+
+      const pronounMatch = clean.match(/\b(i|we|my|our|you|your)\b/i);
+      if (pronounMatch) {
+        return {
+          status: 'warn',
+          badgeClass: 'bg-amber-100 text-amber-900 border-amber-300',
+          label: `Avoid personal pronoun "${pronounMatch[0]}" — use passive voice`
+        };
+      }
+
+      const imperativeMatch = clean.match(
+        /^(place|pipette|put|stir|repeat|label|fill|add|pour|start|record|follow|measure|heat|weigh)\b/i
+      );
+      if (imperativeMatch) {
+        return {
+          status: 'warn',
+          badgeClass: 'bg-amber-100 text-amber-900 border-amber-300',
+          label: `Starts with imperative "${imperativeMatch[0]}" — use "[Object] was/were + V3"`
+        };
+      }
+
+      const passiveRegex =
+        /\b(was|were)\s+(?:\w+ly\s+)?([a-z]+ed|put|set|left|kept|taken|made|held|run|done|lit|shut|cut|let|read|drawn|shown|grown|blown|thrown|known|seen|given|driven|written|spoken|broken|chosen|frozen|stolen|woken|worn|torn|sworn|borne|beaten|bitten|hidden|ridden|risen|shaken|sunk|shrunk|sprung|stung|strung|swung|won|wound|found|bound|ground|fought|bought|brought|thought|taught|caught|sought|sold|told|stood|understood|laid|paid|said|led|fed|bled|bred|fled|sped|met|felt|dealt|knelt|meant|burnt|learnt|spelt|smelt|spoilt|built|sent|spent|lent|bent|rent|swept|wept|slept|crept)\b/i;
+
+      if (passiveRegex.test(clean)) {
+        return {
+          status: 'good',
+          badgeClass: 'bg-emerald-100 text-emerald-900 border-emerald-300',
+          label: '✓ Passive past tense detected'
+        };
+      }
+
+      return {
+        status: 'hint',
+        badgeClass: 'bg-amber-50 text-amber-800 border-amber-200',
+        label: 'Tip: Include "was / were + past participle (e.g., was placed)"'
+      };
+    }
+
+    function renderPassiveQuiz() {
+      const container = document.getElementById('passiveQuizContainer');
+      if (!container) return;
+
+      container.innerHTML = PASSIVE_QUIZ_ITEMS.map((q, qIdx) => {
+        const chosen = state.report.procQuizAnswers[qIdx];
+        const isAnswered = chosen !== null && chosen !== undefined;
+        const isCorrect = chosen === q.correctIdx;
+
+        const optionsHtml = q.options
+          .map((opt, oIdx) => {
+            let btnClass = 'bg-white border-slate-200 text-slate-700 hover:bg-indigo-50/70';
+            if (isAnswered) {
+              if (oIdx === q.correctIdx) {
+                btnClass = 'bg-emerald-50 border-emerald-400 text-emerald-950 font-semibold';
+              } else if (oIdx === chosen) {
+                btnClass = 'bg-rose-50 border-rose-400 text-rose-950';
+              }
+            }
+            return `
+              <button
+                type="button"
+                onclick="answerPassiveQuiz(${qIdx}, ${oIdx})"
+                class="w-full text-left px-3 py-2 rounded-xl border text-xs transition ${btnClass}"
+              >
+                ${opt}
+              </button>
+            `;
+          })
+          .join('');
+
+        return `
+          <div class="rounded-xl bg-white border border-indigo-100 p-3.5 flex flex-col justify-between space-y-2.5 shadow-sm">
+            <div class="space-y-2">
+              <p class="text-xs font-bold text-slate-900">${qIdx + 1}. ${q.prompt}</p>
+              <div class="space-y-1.5">${optionsHtml}</div>
+            </div>
+            ${
+              isAnswered
+                ? `<div class="rounded-lg p-2 text-[11px] leading-relaxed ${
+                    isCorrect ? 'bg-emerald-50 text-emerald-900' : 'bg-amber-50 text-amber-950'
+                  }">${q.explanation}</div>`
+                : ''
+            }
+          </div>
+        `;
+      }).join('');
+
+      const answeredCount = state.report.procQuizAnswers.filter((v) => v !== null && v !== undefined).length;
+      const badge = document.getElementById('passiveQuizScoreBadge');
+      if (badge) badge.textContent = `${answeredCount} / 3 Checked`;
+    }
+
+    function answerPassiveQuiz(qIdx, optIdx) {
+      state.report.procQuizAnswers[qIdx] = optIdx;
+      saveState();
+      renderPassiveQuiz();
+    }
+
+    function setProcedureRewriteView(mode) {
+      state.report.procViewMode = mode;
+      saveState();
+
+      const stepBtn = document.getElementById('procViewStepsBtn');
+      const paraBtn = document.getElementById('procViewParaBtn');
+      const stepView = document.getElementById('procStepRewriterView');
+      const paraView = document.getElementById('procUnifiedParagraphView');
+
+      if (!stepBtn || !paraBtn || !stepView || !paraView) return;
+
+      if (mode === 'paragraph') {
+        paraBtn.className = 'min-h-[38px] px-3 py-1.5 rounded-lg text-xs font-bold transition bg-teal-700 text-white shadow-sm';
+        stepBtn.className = 'min-h-[38px] px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-600 hover:text-slate-900';
+        stepView.classList.add('hidden');
+        paraView.classList.remove('hidden');
+        renderUnifiedProcedureParagraphs();
+      } else {
+        stepBtn.className = 'min-h-[38px] px-3 py-1.5 rounded-lg text-xs font-bold transition bg-teal-700 text-white shadow-sm';
+        paraBtn.className = 'min-h-[38px] px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-600 hover:text-slate-900';
+        paraView.classList.add('hidden');
+        stepView.classList.remove('hidden');
+      }
+    }
+
+    function renderUnifiedProcedureParagraphs() {
+      const partASentences = PROCEDURE_PART_A.map((_, idx) => {
+        const val = (state.report.procPartARewrites[idx] || '').trim();
+        return val || `[Step ${idx + 1} awaiting passive rewrite]`;
+      });
+      const partBSentences = PROCEDURE_PART_B.map((_, idx) => {
+        const val = (state.report.procPartBRewrites[idx] || '').trim();
+        return val || `[Step ${idx + 1} awaiting passive rewrite]`;
+      });
+
+      const elA = document.getElementById('unifiedParaTextA');
+      const elB = document.getElementById('unifiedParaTextB');
+      if (elA) elA.textContent = partASentences.join(' ');
+      if (elB) elB.textContent = partBSentences.join(' ');
+
+      const doneA = state.report.procPartARewrites.filter((s) => s && s.trim()).length;
+      const doneB = state.report.procPartBRewrites.filter((s) => s && s.trim()).length;
+      const badgeA = document.getElementById('paraBadgeA');
+      const badgeB = document.getElementById('paraBadgeB');
+      if (badgeA) badgeA.textContent = `${doneA} / 3 steps written`;
+      if (badgeB) badgeB.textContent = `${doneB} / 9 steps written`;
+    }
+
+    function renderProcedureRewriter() {
+      const buildStepCards = (steps, rewritesArr, modelsArr, partKey) => {
+        return steps
+          .map((item, idx) => {
+            const val = rewritesArr[idx] || '';
+            const analysis = analyzePassivePastTense(val);
+            const modelId = `modelPassive_${partKey}_${idx}`;
+            const badgeId = `passiveBadge_${partKey}_${idx}`;
+
+            return `
+              <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-3.5 sm:p-4 space-y-2.5">
+                <div class="flex flex-wrap items-start justify-between gap-2">
+                  <div class="flex items-start gap-2">
+                    <span class="px-2 py-0.5 rounded-md bg-slate-800 text-white font-mono text-xs font-bold shrink-0">
+                      Step ${item.step}
+                    </span>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                      <strong class="text-slate-800">Manual (Imperative):</strong> "${item.text}"
+                    </p>
+                  </div>
+                  <span id="${badgeId}" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border shrink-0 ${analysis.badgeClass}">
+                    ${analysis.label}
+                  </span>
+                </div>
+
+                <div>
+                  <label for="procInput_${partKey}_${idx}" class="sr-only">Rewrite Step ${item.step} in passive past tense</label>
+                  <textarea
+                    id="procInput_${partKey}_${idx}"
+                    rows="2"
+                    placeholder="Rewrite Step ${item.step} in passive past tense (e.g., ... was placed / were added)..."
+                    oninput="updateProcedureRewrite('${partKey}', ${idx}, this.value)"
+                    class="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-600"
+                  >${val}</textarea>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    onclick="toggleHint('${modelId}')"
+                    class="text-xs font-semibold text-teal-800 hover:underline flex items-center gap-1"
+                  >
+                    <span>Compare with Model Passive Past Tense</span>
+                  </button>
+                  <button
+                    type="button"
+                    onclick="copyModelToStep('${partKey}', ${idx})"
+                    class="text-[11px] font-semibold text-slate-500 hover:text-teal-700 px-2 py-0.5 rounded hover:bg-teal-50"
+                  >
+                    Use Model as Draft
+                  </button>
+                </div>
+
+                <div id="${modelId}" class="${showAllModelsFlag ? '' : 'hidden'} rounded-xl bg-teal-50 border border-teal-200 p-2.5 text-xs text-teal-950">
+                  <strong>Model Passive Past Tense:</strong> "${modelsArr[idx]}"
+                </div>
+              </div>
+            `;
+          })
+          .join('');
+      };
+
+      const listA = document.getElementById('procRewriteListA');
+      const listB = document.getElementById('procRewriteListB');
+      if (listA) {
+        listA.innerHTML = buildStepCards(
+          PROCEDURE_PART_A,
+          state.report.procPartARewrites,
+          MODEL_PASSIVE_PART_A,
+          'A'
+        );
+      }
+      if (listB) {
+        listB.innerHTML = buildStepCards(
+          PROCEDURE_PART_B,
+          state.report.procPartBRewrites,
+          MODEL_PASSIVE_PART_B,
+          'B'
+        );
+      }
+
+      updatePassiveProgressBadge();
+      renderUnifiedProcedureParagraphs();
+    }
+
+    function updateProcedureRewrite(partKey, idx, val) {
+      if (partKey === 'A') {
+        state.report.procPartARewrites[idx] = val;
+      } else {
+        state.report.procPartBRewrites[idx] = val;
+      }
+      saveState();
+
+      const analysis = analyzePassivePastTense(val);
+      const badgeEl = document.getElementById(`passiveBadge_${partKey}_${idx}`);
+      if (badgeEl) {
+        badgeEl.className = `text-[11px] font-bold px-2.5 py-0.5 rounded-full border shrink-0 ${analysis.badgeClass}`;
+        badgeEl.textContent = analysis.label;
+      }
+
+      updatePassiveProgressBadge();
+      renderUnifiedProcedureParagraphs();
+      updateReportReadiness();
+    }
+
+    function copyModelToStep(partKey, idx) {
+      const modelText = partKey === 'A' ? MODEL_PASSIVE_PART_A[idx] : MODEL_PASSIVE_PART_B[idx];
+      if (partKey === 'A') {
+        state.report.procPartARewrites[idx] = modelText;
+      } else {
+        state.report.procPartBRewrites[idx] = modelText;
+      }
+      saveState();
+      renderProcedureRewriter();
+      updateReportReadiness();
+      showToast(`Model passive sentence copied to Part (${partKey}) Step ${idx + 1}.`);
+    }
+
+    function toggleAllModelProcedures() {
+      showAllModelsFlag = !showAllModelsFlag;
+      const btn = document.getElementById('toggleAllModelsBtn');
+      if (btn) {
+        btn.textContent = showAllModelsFlag ? 'Hide All Model Answers' : 'Show All Model Answers';
+      }
+      renderProcedureRewriter();
+    }
+
+    function updatePassiveProgressBadge() {
+      const allRewrites = [...state.report.procPartARewrites, ...state.report.procPartBRewrites];
+      const verifiedCount = allRewrites.filter((txt) => analyzePassivePastTense(txt).status === 'good').length;
+      const badge = document.getElementById('procPassiveProgressBadge');
+      if (badge) {
+        badge.textContent = `${verifiedCount} / 12 Steps Verified Passive`;
+      }
+    }
+
+    // --- Section 5: Synced Report Tables, Sample Calculations & Mirror Charts ---
+    function renderSyncedReportTablesAndCalc() {
+      const t1Body = document.getElementById('repSyncedTable1Body');
+      if (t1Body) {
+        t1Body.innerHTML = TABLE1_BASE.map((r, idx) => {
+          const conc = getCalculatedConcentration(r.vNa2S2O3).toFixed(3);
+          const tVal = state.table1Times[idx];
+          const tStr = tVal && parseFloat(tVal) > 0 ? parseFloat(tVal).toFixed(2) : '—';
+          return `
+            <tr>
+              <td class="py-2 px-3 text-center font-bold text-slate-600">${idx + 1}</td>
+              <td class="py-2 px-3 text-right font-mono">${r.vNa2S2O3.toFixed(2)}</td>
+              <td class="py-2 px-3 text-right font-mono">${r.vWater.toFixed(2)}</td>
+              <td class="py-2 px-3 text-right font-mono font-bold text-teal-800 bg-teal-50/50">${conc}</td>
+              <td class="py-2 px-3 text-right font-mono">${r.vHCl.toFixed(2)}</td>
+              <td class="py-2 px-3 text-right font-mono font-bold text-indigo-900 bg-indigo-50/40">${tStr}</td>
+              <td class="py-2 px-3 text-right font-mono font-bold">${formatRate(tVal)}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      const t2Body = document.getElementById('repSyncedTable2Body');
+      if (t2Body) {
+        t2Body.innerHTML = TABLE2_TEMPS.map((temp, idx) => {
+          const row = state.table2Times[idx];
+          const tNo = row.noCat && parseFloat(row.noCat) > 0 ? parseFloat(row.noCat).toFixed(2) : '—';
+          const tCat = row.cat && parseFloat(row.cat) > 0 ? parseFloat(row.cat).toFixed(2) : '—';
+          return `
+            <tr>
+              <td class="py-2 px-3 text-center font-mono font-bold bg-slate-50">${temp}°C</td>
+              <td class="py-2 px-3 text-right font-mono">${tNo}</td>
+              <td class="py-2 px-3 text-right font-mono font-bold text-indigo-800 bg-indigo-50/40">${formatRate(row.noCat)}</td>
+              <td class="py-2 px-3 text-right font-mono">${tCat}</td>
+              <td class="py-2 px-3 text-right font-mono font-bold text-teal-800 bg-teal-50/40">${formatRate(row.cat)}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      const calcBox = document.getElementById('sampleCalculationBox');
+      if (calcBox) {
+        const v2 = state.concMode === '60' ? 60.0 : 50.0;
+        const m2Run2 = ((0.2 * 40.0) / v2).toFixed(3);
+        const run2Time = parseFloat(state.table1Times[1]);
+        const hasRun2 = !isNaN(run2Time) && run2Time > 0;
+        const tExample = hasRun2 ? run2Time.toFixed(2) : '23.10';
+        const rateExample = (1 / parseFloat(tExample)).toFixed(4);
+
+        calcBox.innerHTML = `
+          <div class="flex flex-wrap items-center justify-between gap-1">
+            <span class="font-extrabold text-teal-900">Sample Calculation (Run 2: 40.00 mL of 0.2 M Na₂S₂O₃ + 10.00 mL H₂O)</span>
+            <span class="text-[11px] font-mono text-teal-700">${hasRun2 ? 'Using your recorded Run 2 time' : 'Illustrative time shown until Run 2 is recorded'}</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1 font-mono text-xs text-slate-800">
+            <div class="bg-white rounded-lg p-2.5 border border-teal-100">
+              <strong class="font-sans text-slate-700 block mb-1">1. Concentration of Na₂S₂O₃ after dilution:</strong>
+              M₁V₁ = M₂V₂<br/>
+              (0.20 M)(40.00 mL) = M₂(${v2.toFixed(2)} mL)<br/>
+              <strong>M₂ = ${m2Run2} M</strong>
+            </div>
+            <div class="bg-white rounded-lg p-2.5 border border-teal-100">
+              <strong class="font-sans text-slate-700 block mb-1">2. Relative Rate of Reaction (1/t):</strong>
+              Time taken, t = ${tExample} s<br/>
+              Rate = 1 / t = 1 / ${tExample} s<br/>
+              <strong>1/t = ${rateExample} s⁻¹</strong>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function initOrUpdateReportPreviewCharts() {
+      if (typeof Chart === 'undefined') return;
+      const c1El = document.getElementById('chart1ReportCanvas');
+      const c2El = document.getElementById('chart2ReportCanvas');
+      if (!c1El || !c2El) return;
+
+      if (!chart1ReportInstance) {
+        chart1ReportInstance = new Chart(c1El.getContext('2d'), {
+          type: 'line',
+          data: {
+            datasets: [
+              {
+                label: '1/t (s⁻¹)',
+                data: getGraph1Points(),
+                borderColor: '#0f766e',
+                backgroundColor: 'rgba(15, 118, 110, 0.14)',
+                pointBackgroundColor: '#0f766e',
+                pointRadius: 4,
+                borderWidth: 2,
+                tension: 0.15,
+                fill: true
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            scales: {
+              x: { type: 'linear', min: 0, title: { display: true, text: '[Na₂S₂O₃] (M)', font: { size: 11, weight: '700' } } },
+              y: { beginAtZero: true, title: { display: true, text: '1/t (s⁻¹)', font: { size: 11, weight: '700' } } }
+            },
+            plugins: { legend: { display: false } }
+          }
+        });
+      } else {
+        chart1ReportInstance.data.datasets[0].data = getGraph1Points();
+        chart1ReportInstance.resize();
+        chart1ReportInstance.update('none');
+      }
+
+      const g2 = getGraph2Points();
+      if (!chart2ReportInstance) {
+        chart2ReportInstance = new Chart(c2El.getContext('2d'), {
+          type: 'line',
+          data: {
+            datasets: [
+              {
+                label: '(A1+B1) No Catalyst',
+                data: g2.noCatPts,
+                borderColor: '#3730a3',
+                pointBackgroundColor: '#3730a3',
+                pointRadius: 4,
+                borderWidth: 2,
+                tension: 0.2
+              },
+              {
+                label: '(A2+B2) +MnSO₄',
+                data: g2.catPts,
+                borderColor: '#0f766e',
+                pointBackgroundColor: '#0f766e',
+                pointRadius: 4,
+                borderWidth: 2,
+                tension: 0.2
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            scales: {
+              x: { type: 'linear', min: 28, max: 52, title: { display: true, text: 'Temperature (°C)', font: { size: 11, weight: '700' } } },
+              y: { beginAtZero: true, title: { display: true, text: '1/t (s⁻¹)', font: { size: 11, weight: '700' } } }
+            },
+            plugins: { legend: { labels: { font: { size: 10 } } } }
+          }
+        });
+      } else {
+        chart2ReportInstance.data.datasets[0].data = g2.noCatPts;
+        chart2ReportInstance.data.datasets[1].data = g2.catPts;
+        chart2ReportInstance.resize();
+        chart2ReportInstance.update('none');
+      }
+    }
+
+    function renderReportBuilder() {
+      renderTheoryConcepts();
+      renderPassiveQuiz();
+      renderProcedureRewriter();
+      setProcedureRewriteView(state.report.procViewMode || 'steps');
+      renderSyncedReportTablesAndCalc();
+      setTimeout(() => {
+        initOrUpdateReportPreviewCharts();
+      }, 30);
+      updateReportReadiness();
+    }
+
+    function updateReportReadiness() {
+      const jumpBar = document.getElementById('sectionJumpBar');
+      const progressBadge = document.getElementById('sevenSectionProgressBadge');
+      const sec1Badge = document.getElementById('sec1StatusBadge');
+
+      const s1Done = Boolean(state.student.name.trim() && state.student.matric.trim());
+      const s2Done = Boolean((state.report.objectives || '').trim());
+      const s3Done = Boolean((state.report.theorySummary || '').trim().length >= 25);
+      const procDoneCount = [...state.report.procPartARewrites, ...state.report.procPartBRewrites].filter(
+        (v) => v && v.trim().length > 0
+      ).length;
+      const s4Done = procDoneCount >= 6;
+      const s5Done = Boolean(
+        (state.report.partARelationship || '').trim() &&
+          (state.report.partBTemp || '').trim() &&
+          (state.report.partBCatalyst || '').trim()
+      );
+      const s6Done = Boolean(
+        (state.report.discussQ1 || '').trim() && (state.report.discussQ2 || '').trim()
+      );
+      const s7Done = Boolean((state.report.conclusion || '').trim());
+
+      const sections = [
+        { id: 'repSec1', num: '1', name: 'Title', done: s1Done },
+        { id: 'repSec2', num: '2', name: 'Objectives', done: s2Done },
+        { id: 'repSec3', num: '3', name: 'Theory', done: s3Done },
+        { id: 'repSec4', num: '4', name: 'Procedure', done: s4Done },
+        { id: 'repSec5', num: '5', name: 'Data Analysis', done: s5Done },
+        { id: 'repSec6', num: '6', name: 'Discussion & Exercise', done: s6Done },
+        { id: 'repSec7', num: '7', name: 'Conclusion', done: s7Done }
+      ];
+
+      const totalReady = sections.filter((s) => s.done).length;
+      if (progressBadge) {
+        progressBadge.textContent = `${totalReady} / 7 Sections Ready`;
+      }
+      if (sec1Badge) {
+        sec1Badge.textContent = s1Done ? '✓ Complete' : 'Fill Name & Matric';
+        sec1Badge.className = s1Done
+          ? 'text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800'
+          : 'text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800';
+      }
+
+      if (jumpBar) {
+        jumpBar.innerHTML = sections
+          .map(
+            (s) => `
+            <button
+              type="button"
+              onclick="scrollToReportSection('${s.id}')"
+              class="shrink-0 min-h-[36px] px-3 py-1 rounded-full text-xs font-bold border transition flex items-center gap-1.5 ${
+                s.done
+                  ? 'bg-emerald-50 border-emerald-300 text-emerald-900 hover:bg-emerald-100'
+                  : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+              }"
+            >
+              <span class="w-4 h-4 rounded-full text-[10px] flex items-center justify-center ${
+                s.done ? 'bg-emerald-600 text-white' : 'bg-slate-300 text-slate-800'
+              }">${s.done ? '✓' : s.num}</span>
+              <span>${s.num}. ${s.name}</span>
+            </button>
+          `
+          )
+          .join('');
+      }
+    }
+
+    function scrollToReportSection(id) {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function getComposedProcedureParagraphs() {
+      const userWroteAnyA = state.report.procPartARewrites.some((v) => v && v.trim());
+      const userWroteAnyB = state.report.procPartBRewrites.some((v) => v && v.trim());
+
+      return {
+        partA: userWroteAnyA
+          ? PROCEDURE_PART_A.map((_, idx) => (state.report.procPartARewrites[idx] || '').trim() || '[Step pending]').join(' ')
+          : '',
+        partB: userWroteAnyB
+          ? PROCEDURE_PART_B.map((_, idx) => (state.report.procPartBRewrites[idx] || '').trim() || '[Step pending]').join(' ')
+          : ''
+      };
+    }
+
+    function renderOffscreenChartPng(config) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 760;
+      canvas.height = 380;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      if (typeof Chart === 'undefined') {
+        return canvas.toDataURL('image/png');
+      }
+
+      const tempChart = new Chart(ctx, {
+        ...config,
+        options: {
+          ...config.options,
+          responsive: false,
+          animation: false
+        }
+      });
+      const dataUrl = canvas.toDataURL('image/png');
+      tempChart.destroy();
+      return dataUrl;
+    }
+
+    async function captureChartsAsPng() {
+      const chart1Url = renderOffscreenChartPng({
+        type: 'line',
+        data: {
+          datasets: [
+            {
+              label: 'Rate of Reaction, 1/t (s⁻¹)',
+              data: getGraph1Points(),
+              borderColor: '#0f766e',
+              backgroundColor: 'rgba(15, 118, 110, 0.15)',
+              pointBackgroundColor: '#0f766e',
+              pointRadius: 5,
+              borderWidth: 2.5,
+              tension: 0.15,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          scales: {
+            x: { type: 'linear', min: 0, title: { display: true, text: 'Concentration of Na₂S₂O₃ (M)', font: { size: 13, weight: '700' } } },
+            y: { beginAtZero: true, title: { display: true, text: 'Rate of Reaction, 1/t (s⁻¹)', font: { size: 13, weight: '700' } } }
+          }
+        }
+      });
+
+      const g2 = getGraph2Points();
+      const chart2Url = renderOffscreenChartPng({
+        type: 'line',
+        data: {
+          datasets: [
+            {
+              label: '(A1 + B1) Without Catalyst MnSO₄',
+              data: g2.noCatPts,
+              borderColor: '#3730a3',
+              pointBackgroundColor: '#3730a3',
+              pointRadius: 5,
+              borderWidth: 2.5,
+              tension: 0.2
+            },
+            {
+              label: '(A2 + B2) With Catalyst MnSO₄',
+              data: g2.catPts,
+              borderColor: '#0f766e',
+              pointBackgroundColor: '#0f766e',
+              pointRadius: 5,
+              borderWidth: 2.5,
+              tension: 0.2
+            }
+          ]
+        },
+        options: {
+          scales: {
+            x: { type: 'linear', min: 28, max: 52, title: { display: true, text: 'Temperature (°C)', font: { size: 13, weight: '700' } } },
+            y: { beginAtZero: true, title: { display: true, text: 'Rate of Reaction, 1/t (s⁻¹)', font: { size: 13, weight: '700' } } }
+          }
+        }
+      });
+
+      return { chart1Url, chart2Url };
+    }
+
+    function dataUrlToUint8Array(dataUrl) {
+      const base64 = dataUrl.split(',')[1];
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return bytes;
+    }
+
+    function buildFormattedReportHtml(chart1Url, chart2Url) {
+      const proc = getComposedProcedureParagraphs();
+      const t1RowsHtml = TABLE1_BASE.map((r, idx) => {
+        const conc = getCalculatedConcentration(r.vNa2S2O3).toFixed(3);
+        const tVal = state.table1Times[idx];
+        const tStr = tVal && parseFloat(tVal) > 0 ? parseFloat(tVal).toFixed(2) : '—';
+        return `
+          <tr>
+            <td style="border:1px solid #94a3b8;padding:6px;text-align:center;">${idx + 1}</td>
+            <td style="border:1px solid #94a3b8;padding:6px;text-align:right;">${r.vNa2S2O3.toFixed(2)}</td>
+            <td style="border:1px solid #94a3b8;padding:6px;text-align:right;">${r.vWater.toFixed(2)}</td>
+            <td style="border:1px solid #94a3b8;padding:6px;text-align:right;font-weight:bold;">${conc}</td>
+            <td style="border:1px solid #94a3b8;padding:6px;text-align:right;">${r.vHCl.toFixed(2)}</td>
+            <td style="border:1px solid #94a3b8;padding:6px;text-align:right;font-weight:bold;">${tStr}</td>
+            <td style="border:1px solid #94a3b8;padding:6px;text-align:right;font-weight:bold;">${formatRate(tVal)}</td>
+          </tr>
+        `;
+      }).join('');
+
+      const t2RowsHtml = TABLE2_TEMPS.map((temp, idx) => {
+        const row = state.table2Times[idx];
+        const tNoStr = row.noCat && parseFloat(row.noCat) > 0 ? parseFloat(row.noCat).toFixed(2) : '—';
+        const tCatStr = row.cat && parseFloat(row.cat) > 0 ? parseFloat(row.cat).toFixed(2) : '—';
+        return `
+          <tr>
+            <td style="border:1px solid #94a3b8;padding:6px;text-align:center;font-weight:bold;">${temp}°C</td>
+            <td style="border:1px solid #94a3b8;padding:6px;text-align:right;">${tNoStr}</td>
+            <td style="border:1px solid #94a3b8;padding:6px;text-align:right;font-weight:bold;">${formatRate(row.noCat)}</td>
+            <td style="border:1px solid #94a3b8;padding:6px;text-align:right;">${tCatStr}</td>
+            <td style="border:1px solid #94a3b8;padding:6px;text-align:right;font-weight:bold;">${formatRate(row.cat)}</td>
+          </tr>
+        `;
+      }).join('');
+
+      return `
+        <div style="font-family:Calibri,Inter,Arial,sans-serif;color:#0f172a;line-height:1.5;font-size:12px;">
+          <div style="text-align:center;border-bottom:2px solid #0f766e;padding-bottom:8px;margin-bottom:14px;">
+            <div style="font-weight:700;color:#0f766e;font-size:11px;letter-spacing:0.05em;">KOLEJ MATRIKULASI KEMENTERIAN PENDIDIKAN MALAYSIA • CHEMISTRY SK025</div>
+            <h1 style="font-size:18px;font-weight:800;margin:4px 0 0;">1.0 TITLE: EXPERIMENT 1 — RATE OF REACTION</h1>
+          </div>
+
+          <table style="width:100%;border-collapse:collapse;margin-bottom:14px;font-size:11px;">
+            <tr>
+              <td style="border:1px solid #94a3b8;padding:6px;background:#f1f5f9;font-weight:700;width:20%;">Full Name</td>
+              <td style="border:1px solid #94a3b8;padding:6px;width:35%;">${state.student.name || '—'}</td>
+              <td style="border:1px solid #94a3b8;padding:6px;background:#f1f5f9;font-weight:700;width:18%;">Matriculation No.</td>
+              <td style="border:1px solid #94a3b8;padding:6px;width:27%;">${state.student.matric || '—'}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #94a3b8;padding:6px;background:#f1f5f9;font-weight:700;">Practicum Group</td>
+              <td style="border:1px solid #94a3b8;padding:6px;">${state.student.group || '—'}</td>
+              <td style="border:1px solid #94a3b8;padding:6px;background:#f1f5f9;font-weight:700;">Practical Date</td>
+              <td style="border:1px solid #94a3b8;padding:6px;">${state.student.date || '—'}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #94a3b8;padding:6px;background:#f1f5f9;font-weight:700;">Lecturer Name</td>
+              <td colspan="3" style="border:1px solid #94a3b8;padding:6px;">${state.student.lecturer || '—'}</td>
+            </tr>
+          </table>
+
+          <h2 style="font-size:13px;font-weight:700;color:#0f766e;margin:12px 0 4px;">2.0 OBJECTIVES</h2>
+          <p style="margin:0 0 10px;">${state.report.objectives || 'To study the effect of concentration, temperature, and catalyst on the reaction rate.'}</p>
+
+          <h2 style="font-size:13px;font-weight:700;color:#0f766e;margin:12px 0 4px;">3.0 THEORY</h2>
+          <p style="margin:0 0 6px;">${state.report.theorySummary || '<em>[Theory summary to be completed by student]</em>'}</p>
+          <p style="margin:0 0 4px;font-size:11px;"><strong>Part (A) Equation:</strong> Na₂S₂O₃(aq) + 2HCl(aq) → 2NaCl(aq) + H₂O(l) + SO₂(g) + S(s)</p>
+          <p style="margin:0 0 10px;font-size:11px;"><strong>Part (B) Equation:</strong> 2MnO₄⁻(aq) + 5C₂O₄²⁻(aq) + 16H⁺(aq) → 2Mn²⁺(aq) + 10CO₂(g) + 8H₂O(l)</p>
+
+          <h2 style="font-size:13px;font-weight:700;color:#0f766e;margin:12px 0 4px;">4.0 PROCEDURE (PASSIVE PAST TENSE)</h2>
+          <p style="margin:0 0 6px;"><strong>(A) The effect of concentration on the reaction rate:</strong><br/>${proc.partA || '<em>[Part A procedure in passive past tense to be completed]</em>'}</p>
+          <p style="margin:0 0 10px;"><strong>(B) The effect of temperature and catalyst on the reaction rate:</strong><br/>${proc.partB || '<em>[Part B procedure in passive past tense to be completed]</em>'}</p>
+
+          <h2 style="font-size:13px;font-weight:700;color:#0f766e;margin:12px 0 4px;">5.0 DATA ANALYSIS</h2>
+          <p style="margin:0 0 6px;"><strong>Table 1.1: Effect of concentration on reaction rate</strong></p>
+          <table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px;">
+            <thead>
+              <tr style="background:#1e293b;color:#fff;">
+                <th style="border:1px solid #94a3b8;padding:6px;">Run</th>
+                <th style="border:1px solid #94a3b8;padding:6px;">Vol. 0.2 M Na₂S₂O₃ (mL)</th>
+                <th style="border:1px solid #94a3b8;padding:6px;">Vol. H₂O (mL)</th>
+                <th style="border:1px solid #94a3b8;padding:6px;">Conc. Na₂S₂O₃ (M)</th>
+                <th style="border:1px solid #94a3b8;padding:6px;">Vol. 0.1 M HCl (mL)</th>
+                <th style="border:1px solid #94a3b8;padding:6px;">Time, t (s)</th>
+                <th style="border:1px solid #94a3b8;padding:6px;">1/t (s⁻¹)</th>
+              </tr>
+            </thead>
+            <tbody>${t1RowsHtml}</tbody>
+          </table>
+          <div style="text-align:center;margin:8px 0 10px;">
+            <img src="${chart1Url}" style="max-width:460px;width:100%;height:auto;border:1px solid #e2e8f0;" />
+          </div>
+          <p style="margin:0 0 12px;"><strong>Graph 1 Interpretation (Concentration, Time &amp; Rate):</strong> ${state.report.partARelationship || '—'}</p>
+
+          <p style="margin:0 0 6px;"><strong>Table 1.2: Effect of temperature and catalyst on reaction rate</strong></p>
+          <table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px;">
+            <thead>
+              <tr style="background:#1e293b;color:#fff;">
+                <th rowspan="2" style="border:1px solid #94a3b8;padding:6px;">Temp (°C)</th>
+                <th colspan="2" style="border:1px solid #94a3b8;padding:6px;">(A1 + B1) Without Catalyst MnSO₄</th>
+                <th colspan="2" style="border:1px solid #94a3b8;padding:6px;">(A2 + B2) With Catalyst MnSO₄</th>
+              </tr>
+              <tr style="background:#334155;color:#fff;">
+                <th style="border:1px solid #94a3b8;padding:5px;">t (s)</th>
+                <th style="border:1px solid #94a3b8;padding:5px;">1/t (s⁻¹)</th>
+                <th style="border:1px solid #94a3b8;padding:5px;">t (s)</th>
+                <th style="border:1px solid #94a3b8;padding:5px;">1/t (s⁻¹)</th>
+              </tr>
+            </thead>
+            <tbody>${t2RowsHtml}</tbody>
+          </table>
+          <div style="text-align:center;margin:8px 0 10px;">
+            <img src="${chart2Url}" style="max-width:460px;width:100%;height:auto;border:1px solid #e2e8f0;" />
+          </div>
+          <p style="margin:0 0 4px;"><strong>(i) Temperature &amp; Rate:</strong> ${state.report.partBTemp || '—'}</p>
+          <p style="margin:0 0 12px;"><strong>(ii) Catalyst &amp; Rate:</strong> ${state.report.partBCatalyst || '—'}</p>
+
+          <h2 style="font-size:13px;font-weight:700;color:#0f766e;margin:12px 0 4px;">6.0 DISCUSSION AND EXERCISE</h2>
+          <p style="margin:0 0 4px;"><strong>Qualitative Observations — Part (A):</strong> ${state.observations.partA || '—'}</p>
+          <p style="margin:0 0 4px;"><strong>Qualitative Observations — Part (B):</strong> ${state.observations.partB || '—'}</p>
+          <p style="margin:0 0 4px;"><strong>Scientific Discussion (Collision Theory):</strong> ${state.report.discussionTheoryObs || '—'}</p>
+          <p style="margin:0 0 8px;"><strong>Experimental Precautions:</strong> ${state.report.precautions || '—'}</p>
+          <p style="margin:0 0 4px;"><strong>Exercise Q1 (Function of Catalyst):</strong> ${state.report.discussQ1 || '—'}</p>
+          <p style="margin:0 0 12px;"><strong>Exercise Q2 (What does 1/t represent?):</strong> ${state.report.discussQ2 || '—'}</p>
+
+          <h2 style="font-size:13px;font-weight:700;color:#0f766e;margin:12px 0 4px;">7.0 CONCLUSION</h2>
+          <p style="margin:0;">${state.report.conclusion || '—'}</p>
+        </div>
+      `;
+    }
+
+    async function openReportPreviewModal() {
+      const { chart1Url, chart2Url } = await captureChartsAsPng();
+      const sheet = document.getElementById('a4PreviewSheet');
+      if (sheet) {
+        sheet.innerHTML = buildFormattedReportHtml(chart1Url, chart2Url);
+      }
+      document.getElementById('reportPreviewModal').classList.remove('hidden');
+    }
+
+    function closeReportPreviewModal() {
+      document.getElementById('reportPreviewModal').classList.add('hidden');
+    }
+
+    async function generateDocxReport() {
+      const btn = document.getElementById('generateDocxBtn');
+      const origHtml = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>Building .DOCX...</span>';
+      }
+
+      try {
+        const { chart1Url, chart2Url } = await captureChartsAsPng();
+
+        // Fallback to Word-compatible .doc if docx CDN is unavailable offline
+        if (!window.docx) {
+          const htmlDoc = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+            <head><meta charset="utf-8"><title>SK025 Experiment 1 Lab Report</title></head>
+            <body>${buildFormattedReportHtml(chart1Url, chart2Url)}</body>
+            </html>
+          `;
+          const fallbackBlob = new Blob(['\ufeff', htmlDoc], { type: 'application/msword' });
+          const matricClean = (state.student.matric || 'Student').trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+          const fallbackName = `SK025_Exp1_Lab_Report_${matricClean}.doc`;
+          const url = URL.createObjectURL(fallbackBlob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = fallbackName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 1500);
+          showToast(`Downloaded Word-compatible ${fallbackName}`);
+          return;
+        }
+
+        const chart1Bytes = dataUrlToUint8Array(chart1Url);
+        const chart2Bytes = dataUrlToUint8Array(chart2Url);
+
+        const {
+          Document,
+          Packer,
+          Paragraph,
+          TextRun,
+          Table,
+          TableRow,
+          TableCell,
+          WidthType,
+          AlignmentType,
+          HeadingLevel,
+          BorderStyle,
+          ImageRun,
+          ShadingType,
+          VerticalAlign
+        } = window.docx;
+
+        const borderSpec = {
+          top: { style: BorderStyle.SINGLE, size: 6, color: 'CBD5E1' },
+          bottom: { style: BorderStyle.SINGLE, size: 6, color: 'CBD5E1' },
+          left: { style: BorderStyle.SINGLE, size: 6, color: 'CBD5E1' },
+          right: { style: BorderStyle.SINGLE, size: 6, color: 'CBD5E1' }
+        };
+
+        const makeCell = (text, options = {}) => {
+          return new TableCell({
+            width: options.width ? { size: options.width, type: WidthType.PERCENTAGE } : undefined,
+            columnSpan: options.colSpan || 1,
+            rowSpan: options.rowSpan || 1,
+            verticalAlign: VerticalAlign.CENTER,
+            borders: borderSpec,
+            shading: options.fill ? { fill: options.fill, type: ShadingType.CLEAR } : undefined,
+            margins: { top: 90, bottom: 90, left: 120, right: 120 },
+            children: [
+              new Paragraph({
+                alignment: options.align || AlignmentType.LEFT,
+                children: [
+                  new TextRun({
+                    text: String(text || '—'),
+                    bold: Boolean(options.bold),
+                    color: options.color || '1E293B',
+                    size: options.size || 20,
+                    font: 'Calibri'
+                  })
+                ]
+              })
+            ]
+          });
+        };
+
+        const sectionHeading = (title) =>
+          new Paragraph({
+            heading: HeadingLevel.HEADING_2,
+            spacing: { before: 240, after: 100 },
+            children: [
+              new TextRun({
+                text: title,
+                bold: true,
+                color: '0F766E',
+                size: 25,
+                font: 'Calibri'
+              })
+            ]
+          });
+
+        const bodyPara = (text, boldPrefix = '') => {
+          const runs = [];
+          if (boldPrefix) {
+            runs.push(
+              new TextRun({
+                text: boldPrefix,
+                bold: true,
+                color: '0F172A',
+                size: 21,
+                font: 'Calibri'
+              })
+            );
+          }
+          runs.push(
+            new TextRun({
+              text: text && text.trim() ? text.trim() : '[To be completed by student]',
+              color: text && text.trim() ? '1E293B' : '64748B',
+              italics: !(text && text.trim()),
+              size: 21,
+              font: 'Calibri'
+            })
+          );
+          return new Paragraph({
+            spacing: { after: 110 },
+            children: runs
+          });
+        };
+
+        const metaTable = new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: [
+            new TableRow({
+              children: [
+                makeCell('FULL NAME', { bold: true, fill: 'F1F5F9', width: 22 }),
+                makeCell(state.student.name || '____________________________', { width: 38 }),
+                makeCell('MATRIC NO.', { bold: true, fill: 'F1F5F9', width: 18 }),
+                makeCell(state.student.matric || '______________', { bold: true, width: 22 })
+              ]
+            }),
+            new TableRow({
+              children: [
+                makeCell('PRACTICUM GROUP', { bold: true, fill: 'F1F5F9', width: 22 }),
+                makeCell(state.student.group || '______________', { width: 38 }),
+                makeCell('DATE', { bold: true, fill: 'F1F5F9', width: 18 }),
+                makeCell(state.student.date || '______________', { width: 22 })
+              ]
+            }),
+            new TableRow({
+              children: [
+                makeCell('LECTURER NAME', { bold: true, fill: 'F1F5F9', width: 22 }),
+                makeCell(state.student.lecturer || '____________________________', { colSpan: 3 })
+              ]
+            })
+          ]
+        });
+
+        const t1Header = new TableRow({
+          tableHeader: true,
+          children: [
+            makeCell('Run', { bold: true, fill: '1E293B', color: 'FFFFFF', align: AlignmentType.CENTER }),
+            makeCell('Vol. 0.2 M Na₂S₂O₃ (mL)', { bold: true, fill: '1E293B', color: 'FFFFFF', align: AlignmentType.RIGHT }),
+            makeCell('Vol. Distilled Water (mL)', { bold: true, fill: '1E293B', color: 'FFFFFF', align: AlignmentType.RIGHT }),
+            makeCell('Conc. of Na₂S₂O₃ (M)', { bold: true, fill: '0F766E', color: 'FFFFFF', align: AlignmentType.RIGHT }),
+            makeCell('Vol. 0.1 M HCl (mL)', { bold: true, fill: '1E293B', color: 'FFFFFF', align: AlignmentType.RIGHT }),
+            makeCell('Time, t (s)', { bold: true, fill: '3730A3', color: 'FFFFFF', align: AlignmentType.RIGHT }),
+            makeCell('Rate, 1/t (s⁻¹)', { bold: true, fill: '0F172A', color: 'FFFFFF', align: AlignmentType.RIGHT })
+          ]
+        });
+
+        const t1DataRows = TABLE1_BASE.map((r, idx) => {
+          const conc = getCalculatedConcentration(r.vNa2S2O3).toFixed(3);
+          const tVal = state.table1Times[idx];
+          const tStr = tVal && parseFloat(tVal) > 0 ? parseFloat(tVal).toFixed(2) : '—';
+          const rateStr = formatRate(tVal);
+          return new TableRow({
+            children: [
+              makeCell(idx + 1, { align: AlignmentType.CENTER, bold: true }),
+              makeCell(r.vNa2S2O3.toFixed(2), { align: AlignmentType.RIGHT }),
+              makeCell(r.vWater.toFixed(2), { align: AlignmentType.RIGHT }),
+              makeCell(conc, { align: AlignmentType.RIGHT, bold: true, fill: 'F0FDFA' }),
+              makeCell(r.vHCl.toFixed(2), { align: AlignmentType.RIGHT }),
+              makeCell(tStr, { align: AlignmentType.RIGHT, bold: true }),
+              makeCell(rateStr, { align: AlignmentType.RIGHT, bold: true, fill: 'EEF2FF' })
+            ]
+          });
+        });
+
+        const table1Docx = new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: [t1Header, ...t1DataRows]
+        });
+
+        const t2GroupHeader = new TableRow({
+          tableHeader: true,
+          children: [
+            makeCell('Temperature (°C)', { bold: true, fill: '1E293B', color: 'FFFFFF', align: AlignmentType.CENTER, rowSpan: 2 }),
+            makeCell('(A1 + B1) Without Catalyst MnSO₄', { bold: true, fill: '3730A3', color: 'FFFFFF', align: AlignmentType.CENTER, colSpan: 2 }),
+            makeCell('(A2 + B2) With Catalyst MnSO₄', { bold: true, fill: '0F766E', color: 'FFFFFF', align: AlignmentType.CENTER, colSpan: 2 })
+          ]
+        });
+
+        const t2SubHeader = new TableRow({
+          tableHeader: true,
+          children: [
+            makeCell('Time, t (s)', { bold: true, fill: '312E81', color: 'FFFFFF', align: AlignmentType.RIGHT }),
+            makeCell('Rate, 1/t (s⁻¹)', { bold: true, fill: '1E1B4B', color: 'FFFFFF', align: AlignmentType.RIGHT }),
+            makeCell('Time, t (s)', { bold: true, fill: '115E59', color: 'FFFFFF', align: AlignmentType.RIGHT }),
+            makeCell('Rate, 1/t (s⁻¹)', { bold: true, fill: '042F2E', color: 'FFFFFF', align: AlignmentType.RIGHT })
+          ]
+        });
+
+        const t2DataRows = TABLE2_TEMPS.map((temp, idx) => {
+          const row = state.table2Times[idx];
+          const tNoStr = row.noCat && parseFloat(row.noCat) > 0 ? parseFloat(row.noCat).toFixed(2) : '—';
+          const tCatStr = row.cat && parseFloat(row.cat) > 0 ? parseFloat(row.cat).toFixed(2) : '—';
+          return new TableRow({
+            children: [
+              makeCell(`${temp}°C`, { align: AlignmentType.CENTER, bold: true, fill: 'F8FAFC' }),
+              makeCell(tNoStr, { align: AlignmentType.RIGHT }),
+              makeCell(formatRate(row.noCat), { align: AlignmentType.RIGHT, bold: true, fill: 'EEF2FF' }),
+              makeCell(tCatStr, { align: AlignmentType.RIGHT }),
+              makeCell(formatRate(row.cat), { align: AlignmentType.RIGHT, bold: true, fill: 'F0FDFA' })
+            ]
+          });
+        });
+
+        const table2Docx = new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: [t2GroupHeader, t2SubHeader, ...t2DataRows]
+        });
+
+        const concBasisNote =
+          state.concMode === '50'
+            ? 'Concentration calculation basis: Diluted Na₂S₂O₃ before HCl addition (M₁V₁ = M₂V₂, V₂ = 50.00 mL).'
+            : 'Concentration calculation basis: Total reaction mixture volume including 10.00 mL HCl (M₁V₁ = M₂V₂, V₂ = 60.00 mL).';
+
+        const procParagraphs = getComposedProcedureParagraphs();
+
+        const doc = new Document({
+          sections: [
+            {
+              properties: {
+                page: {
+                  margin: { top: 850, bottom: 850, left: 900, right: 900 }
+                }
+              },
+              children: [
+                new Paragraph({
+                  alignment: AlignmentType.CENTER,
+                  spacing: { after: 40 },
+                  children: [
+                    new TextRun({
+                      text: 'KOLEJ MATRIKULASI KEMENTERIAN PENDIDIKAN MALAYSIA (SK025)',
+                      bold: true,
+                      color: '0F766E',
+                      size: 22,
+                      font: 'Calibri'
+                    })
+                  ]
+                }),
+                new Paragraph({
+                  alignment: AlignmentType.CENTER,
+                  spacing: { after: 180 },
+                  children: [
+                    new TextRun({
+                      text: '1.0 TITLE: EXPERIMENT 1 — RATE OF REACTION',
+                      bold: true,
+                      color: '0F172A',
+                      size: 28,
+                      font: 'Calibri'
+                    })
+                  ]
+                }),
+
+                metaTable,
+
+                sectionHeading('2.0 OBJECTIVES'),
+                bodyPara(
+                  state.report.objectives ||
+                    'To study the effect of concentration, temperature, and catalyst on the reaction rate.'
+                ),
+
+                sectionHeading('3.0 THEORY'),
+                bodyPara(state.report.theorySummary),
+                bodyPara(
+                  'Na₂S₂O₃(aq) + 2HCl(aq) → 2NaCl(aq) + H₂O(l) + SO₂(g) + S(s)',
+                  'Part (A) Reaction Equation: '
+                ),
+                bodyPara(
+                  '2MnO₄⁻(aq) + 5C₂O₄²⁻(aq) + 16H⁺(aq) → 2Mn²⁺(aq) + 10CO₂(g) + 8H₂O(l)',
+                  'Part (B) Reaction Equation: '
+                ),
+
+                sectionHeading('4.0 PROCEDURE'),
+                bodyPara(
+                  procParagraphs.partA,
+                  '(A) The effect of concentration on the reaction rate: '
+                ),
+                bodyPara(
+                  procParagraphs.partB,
+                  '(B) The effect of temperature and catalyst on the reaction rate: '
+                ),
+
+                sectionHeading('5.0 DATA ANALYSIS'),
+                new Paragraph({
+                  spacing: { after: 80 },
+                  children: [
+                    new TextRun({
+                      text: `Table 1.1: Effect of concentration on reaction rate (${concBasisNote})`,
+                      italics: true,
+                      color: '475569',
+                      size: 19,
+                      font: 'Calibri'
+                    })
+                  ]
+                }),
+                table1Docx,
+
+                new Paragraph({
+                  alignment: AlignmentType.CENTER,
+                  spacing: { before: 180, after: 60 },
+                  children: [
+                    new ImageRun({
+                      data: chart1Bytes,
+                      transformation: { width: 490, height: 245 }
+                    })
+                  ]
+                }),
+                new Paragraph({
+                  alignment: AlignmentType.CENTER,
+                  spacing: { after: 140 },
+                  children: [
+                    new TextRun({
+                      text: 'Figure 1: Graph of Rate of Reaction, 1/t (s⁻¹) against Concentration of Na₂S₂O₃ (M)',
+                      bold: true,
+                      size: 19,
+                      color: '334155',
+                      font: 'Calibri'
+                    })
+                  ]
+                }),
+                bodyPara(
+                  state.report.partARelationship,
+                  'Graph 1 Interpretation — Relationship between concentration of Na₂S₂O₃ with time and rate of reaction: '
+                ),
+
+                new Paragraph({
+                  spacing: { before: 120, after: 80 },
+                  children: [
+                    new TextRun({
+                      text: 'Table 1.2: Effect of temperature and MnSO₄ catalyst on reaction rate',
+                      italics: true,
+                      color: '475569',
+                      size: 19,
+                      font: 'Calibri'
+                    })
+                  ]
+                }),
+                table2Docx,
+
+                new Paragraph({
+                  alignment: AlignmentType.CENTER,
+                  spacing: { before: 180, after: 60 },
+                  children: [
+                    new ImageRun({
+                      data: chart2Bytes,
+                      transformation: { width: 490, height: 245 }
+                    })
+                  ]
+                }),
+                new Paragraph({
+                  alignment: AlignmentType.CENTER,
+                  spacing: { after: 140 },
+                  children: [
+                    new TextRun({
+                      text: 'Figure 2: Graph of Rate of Reaction, 1/t (s⁻¹) against Temperature (°C) with and without MnSO₄ Catalyst',
+                      bold: true,
+                      size: 19,
+                      color: '334155',
+                      font: 'Calibri'
+                    })
+                  ]
+                }),
+                bodyPara(
+                  state.report.partBTemp,
+                  '(i) Relationship between temperature and rate of reaction: '
+                ),
+                bodyPara(
+                  state.report.partBCatalyst,
+                  '(ii) Relationship between catalyst and rate of reaction: '
+                ),
+
+                sectionHeading('6.0 DISCUSSION AND EXERCISE'),
+                bodyPara(state.observations.partA, 'Qualitative Observations — Part (A): '),
+                bodyPara(state.observations.partB, 'Qualitative Observations — Part (B): '),
+                bodyPara(state.report.discussionTheoryObs, 'Scientific Discussion (Collision Theory): '),
+                bodyPara(state.report.precautions, 'Experimental Precautions & Sources of Error: '),
+                bodyPara(
+                  state.report.discussQ1,
+                  'Exercise Q1 — What is the function of the catalyst in the above reactions? '
+                ),
+                bodyPara(
+                  state.report.discussQ2,
+                  'Exercise Q2 — What does 1/t represent? '
+                ),
+
+                sectionHeading('7.0 CONCLUSION'),
+                bodyPara(state.report.conclusion)
+              ]
+            }
+          ]
+        });
+
+        const blob = await Packer.toBlob(doc);
+        const matricClean = (state.student.matric || 'Student')
+          .trim()
+          .replace(/[^a-zA-Z0-9_-]/g, '_');
+        const filename = `SK025_Exp1_Lab_Report_${matricClean}.docx`;
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+
+        showToast(`Downloaded ${filename}`);
+      } catch (err) {
+        console.error('DOCX Generation Error:', err);
+        showToast('Could not generate .DOCX file. Try Print / PDF Preview.');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origHtml;
+        }
+      }
+    }
+
+    async function printCleanReport() {
+      const { chart1Url, chart2Url } = await captureChartsAsPng();
+      const printArea = document.getElementById('printReportArea');
+      printArea.innerHTML = buildFormattedReportHtml(chart1Url, chart2Url);
+
+      printArea.classList.remove('hidden');
+      setTimeout(() => {
+        window.print();
+        printArea.classList.add('hidden');
+      }, 120);
+    }
+
+    // ==================== TEACHER DEMO SAMPLE DATA & RESET ====================
+    function loadSampleData() {
+      state.student = {
+        name: 'Aiman Hakim bin Zulkifli',
+        matric: 'MS2415104821',
+        group: 'K1T04A',
+        date: new Date().toISOString().split('T')[0],
+        lecturer: 'Pn. Siti Aminah binti Ismail'
+      };
+      state.apparatusChecked = Array(APPARATUS_ITEMS.length).fill(true);
+      state.reagentsChecked = Array(REAGENT_ITEMS.length).fill(true);
+      state.stepsAChecked = Array(PROCEDURE_PART_A.length).fill(true);
+      state.stepsBChecked = Array(PROCEDURE_PART_B.length).fill(true);
+
+      state.observations = {
+        partA:
+          "Upon adding 0.1 M HCl to the colourless Na₂S₂O₃ solution, the mixture gradually turned pale yellow and cloudy due to the formation of insoluble sulfur precipitate, S(s), which obscured the black 'X' mark beneath the conical flask. Higher concentrations of Na₂S₂O₃ obscured the 'X' mark much faster.",
+        partB:
+          'The deep purple KMnO₄ mixture decolourized to a colourless solution with gentle evolution of CO₂ gas bubbles. At each temperature (30°C–50°C), tubes (A2 + B2) containing MnSO₄ catalyst turned colourless significantly faster than (A1 + B1) without catalyst. Reaction time also decreased steadily as water bath temperature increased.'
+      };
+
+      state.table1Times = ['18.45', '23.10', '31.20', '47.80', '96.50'];
+      state.table2Times = [
+        { noCat: '142.30', cat: '38.60' },
+        { noCat: '98.40', cat: '26.15' },
+        { noCat: '64.20', cat: '17.80' },
+        { noCat: '31.50', cat: '9.40' }
+      ];
+
+      state.report = {
+        objectives: 'To study the effect of concentration, temperature, and catalyst on the reaction rate.',
+        theorySummary:
+          'Reaction rate is defined as the change in concentration of reactants or products per unit time. Several factors influence the rate of a chemical reaction, including reactant concentration, temperature, presence of a catalyst, particle size, and pressure. In laboratory investigations, reaction rate is determined by observing changes in physical or chemical properties—such as the formation of a yellow sulfur precipitate between Na₂S₂O₃ and HCl or the decolourization of purple KMnO₄ by H₂C₂O₄—and is inversely proportional to reaction time (Rate ∝ 1/t).',
+        theoryConcepts: [true, true, true, true, true],
+        procPartARewrites: [...MODEL_PASSIVE_PART_A],
+        procPartBRewrites: [...MODEL_PASSIVE_PART_B],
+        procViewMode: 'steps',
+        procQuizAnswers: [0, 1, 2],
+        partARelationship:
+          "As the concentration of sodium thiosulphate (Na₂S₂O₃) increases, the time taken for the 'X' mark to disappear decreases, and the rate of reaction (1/t) increases linearly (directly proportional to [Na₂S₂O₃]).",
+        partBTemp:
+          'As temperature increases from 30°C to 50°C, the rate of reaction (1/t) increases rapidly. At higher temperatures, reactant particles possess higher average kinetic energy, so a greater fraction of colliding particles achieve or exceed the activation energy (Eₐ).',
+        partBCatalyst:
+          'The presence of MnSO₄ catalyst increases the rate of reaction at every temperature, shown by the (A2 + B2) curve lying consistently above the uncatalysed (A1 + B1) curve.',
+        discussionTheoryObs:
+          "In Part A, increasing [Na₂S₂O₃] increases the number of thiosulphate ions per unit volume, raising the frequency of effective collisions and accelerating the formation of colloidal sulfur S(s) that obscures the 'X' mark. In Part B, increasing temperature raises particle kinetic energy so more collisions overcome Eₐ, while adding MnSO₄ supplies Mn²⁺ ions that catalyse the reduction of purple MnO₄⁻ to colourless Mn²⁺.",
+        precautions:
+          "1. The same laminated 'X' mark paper and identical 100 mL conical flasks were used across all runs in Part A while viewing vertically from the top to avoid parallax error.\n2. In Part B, boiling tubes A and B were equilibrated in the water bath for 3 minutes before mixing, and tube A remained immersed inside the water bath during reaction to maintain constant temperature.",
+        discussQ1:
+          'MnSO₄ provides Mn²⁺ ions which act as a catalyst to speed up the reaction by providing an alternative reaction pathway with a lower activation energy (Eₐ), without being chemically consumed at the end of the reaction.',
+        discussQ2:
+          "1/t (unit: s⁻¹) represents the relative average rate of reaction, because the reaction rate is inversely proportional to the time taken for a fixed amount of visual change (obscuring the 'X' mark or complete decolourization of KMnO₄) to occur.",
+        conclusion:
+          'The rate of reaction increases when the concentration of reactant increases, when the temperature increases, and in the presence of a suitable catalyst (MnSO₄).'
+      };
+
+      saveState();
+      hydrateAllInputs();
+      renderChecklists();
+      renderProcedureSteps();
+      renderTables();
+      updateCharts();
+      renderReportBuilder();
+      showToast('Sample SK025 experimental data & 7-section report loaded!');
+    }
+
+    function openResetModal() {
+      document.getElementById('resetModal').classList.remove('hidden');
+    }
+
+    function closeResetModal() {
+      document.getElementById('resetModal').classList.add('hidden');
+    }
+
+    function confirmResetAllData() {
+      resetStopwatch();
+      localStorage.removeItem(STORAGE_KEY);
+      state = getDefaultState();
+      saveState();
+      hydrateAllInputs();
+      renderChecklists();
+      renderProcedureSteps();
+      renderTables();
+      updateCharts();
+      renderReportBuilder();
+      closeResetModal();
+      showToast('All lab data has been reset.');
+    }
+
+    function hydrateAllInputs() {
+      document.getElementById('studentName').value = state.student.name || '';
+      document.getElementById('studentMatric').value = state.student.matric || '';
+      document.getElementById('studentGroup').value = state.student.group || '';
+      document.getElementById('studentDate').value = state.student.date || '';
+
+      document.getElementById('repTitleName').value = state.student.name || '';
+      document.getElementById('repTitleMatric').value = state.student.matric || '';
+      document.getElementById('repTitleGroup').value = state.student.group || '';
+      document.getElementById('repTitleDate').value = state.student.date || '';
+      document.getElementById('repTitleLecturer').value = state.student.lecturer || '';
+
+      document.getElementById('obsPartA').value = state.observations.partA || '';
+      document.getElementById('obsPartB').value = state.observations.partB || '';
+
+      document.getElementById('repObjectives').value =
+        state.report.objectives ||
+        'To study the effect of concentration, temperature, and catalyst on the reaction rate.';
+      document.getElementById('repTheorySummary').value = state.report.theorySummary || '';
+      document.getElementById('repPartARelationship').value = state.report.partARelationship || '';
+      document.getElementById('repPartBTemp').value = state.report.partBTemp || '';
+      document.getElementById('repPartBCatalyst').value = state.report.partBCatalyst || '';
+      document.getElementById('repDiscussionTheoryObs').value = state.report.discussionTheoryObs || '';
+      document.getElementById('repPrecautions').value = state.report.precautions || '';
+      document.getElementById('repDiscussQ1').value = state.report.discussQ1 || '';
+      document.getElementById('repDiscussQ2').value = state.report.discussQ2 || '';
+      document.getElementById('repConclusion').value = state.report.conclusion || '';
+
+      const targetSelect = document.getElementById('swTargetSelect');
+      if (targetSelect && state.stopwatch.targetCell) {
+        targetSelect.value = state.stopwatch.targetCell;
+      }
+      toggleStopwatchExpand(state.stopwatch.expanded !== false);
+      renderStopwatchUI();
+    }
+
+    // ==================== INITIAL BOOTSTRAP ====================
+    window.addEventListener('DOMContentLoaded', () => {
+      hydrateAllInputs();
+      renderChecklists();
+      renderProcedureSteps();
+      switchProcedurePart(state.procPart || 'A');
+      renderTables();
+      initCharts();
+      renderReportBuilder();
+      switchTab(state.activeTab || 'tab1');
+    });
+  </script>
+</body>
+</html>
